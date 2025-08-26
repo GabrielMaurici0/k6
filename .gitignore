@@ -1,1 +1,23 @@
+# k6 results
+*.json
+*.csv
+*.html
+/results/
+
+# node deps 
+node_modules/
+package-lock.json
+
+# docker volumes
+grafana-data/
+influxdb-data/
+prometheus-data/
+data/
+
+# env/config local
 .env
+.env.local
+docker-compose.override.yml
+
+# logs
+*.log

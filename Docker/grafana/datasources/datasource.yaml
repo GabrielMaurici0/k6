@@ -1,0 +1,7 @@
+datasources:
+  - name: InfluxDB
+    type: influxdb
+    uid: influxdb-main
+    url: http://influxdb:8086
+    database: k6
+    isDefault: true

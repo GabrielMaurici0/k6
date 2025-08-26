@@ -18,7 +18,7 @@ export class Login {
 
   async goto() {
     const _url = __ENV.URL;
-    await this.page.goto(_url);
+    await this.page.goto(_url+'hsiscobra');
   }
 
   async submitForm() {

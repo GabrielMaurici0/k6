@@ -1,6 +1,8 @@
 import { browser } from "k6/browser";
 import { Login } from "../../pages/loginPage.js"
 
+const dados = JSON.parse(open("../../data/values.json"));
+
 export const options = {
   scenarios: {
     ui: {
@@ -66,12 +68,13 @@ export default async function () {
 
     const devedor = page.locator("#_DEVEDOR_CODIGO");
 
-    const _devcod = __ENV.DEVCOD
+    // const _devcod = __ENV.DEVCOD
+    const _value = dados.acionamento[__VU - 1];
 
     if (devedor.isEnabled()) {
       await page.waitForTimeout(500);
       await devedor.click()
-      await devedor.fill(_devcod)
+      await devedor.fill(_value);
       await page
         .locator("#TABLE7 > tbody > tr > td:nth-child(1) > input:nth-child(2)")
         .click();

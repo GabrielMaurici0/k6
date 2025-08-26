@@ -1,5 +1,4 @@
-import script1 from "./gerarAcordoCalculada.js";
-// import script2 from "./script2.js";
+import script1 from "./acionamento.js";
 
 export const options = {
   scenarios: {
