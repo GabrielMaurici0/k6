@@ -29,7 +29,9 @@ meu-projeto-k6/
 ```
 
 ## 3. Criação de um teste simples
-    Crie tests/teste_api.js:
+
+Crie tests/teste_api.js:
+    
 ```javascript
 import http from 'k6/http';
 import { sleep, check } from 'k6';
