@@ -3,23 +3,23 @@ import { Login } from "../../pages/loginPage.js"
 
 const dados = JSON.parse(open("../../data/values.json"));
 
-export const options = {
-  scenarios: {
-    ui: {
-      executor: "shared-iterations",
-      iterations: 5, //quantia de vezes que vai executar
-      vus: 1, //quantia de guias que vão ser abertas 
-      options: {
-        browser: {
-          type: "chromium",
-        },
-      },
-    },
-  },
-  thresholds: {
-    checks: ["rate==1.0"],
-  },
-};
+// export const options = {
+//   scenarios: {
+//     ui: {
+//       executor: "shared-iterations",
+//       iterations: 5, //quantia de vezes que vai executar
+//       vus: 1, //quantia de guias que vão ser abertas 
+//       options: {
+//         browser: {
+//           type: "chromium",
+//         },
+//       },
+//     },
+//   },
+//   thresholds: {
+//     checks: ["rate==1.0"],
+//   },
+// };
 
 export default async function () {
 

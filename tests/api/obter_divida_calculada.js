@@ -5,17 +5,6 @@ import { check } from "k6";
 
 const dados = JSON.parse(open("../../data/values.json"));
 
-
-export const options = {
-  vus: 500,
-  iterations: 100,
-  duration: '5m',
-    stages: [
-      { duration: "5m", target: 100 },
-      { duration: "6m", target: 0 },
-    ]
-};
-
 export default function () {
   
   const _url = __ENV.URL
