@@ -1,6 +1,6 @@
 import http from "k6/http";
 import { check } from "k6";
-import encoding from "k6/encoding"; // 👈 Import necessário para Base64 no K6
+import encoding from "k6/encoding"; 
 
 // Carrega os dados JSON no init stage
 const dados = JSON.parse(open("../../data/values.json"));
@@ -9,7 +9,7 @@ const _auth = dados.config.token;
 const _carcod = dados.config.carcod;
 const _empcod = dados.config.empcod;
 
-// ✅ Pré-carrega os arquivos e converte para base64 corretamente
+
 const arquivosBase64 = dados.suspeita_fraude.arquivo.map((path) => {
   const fileData = open(path, "b"); // Retorna ArrayBuffer
   return encoding.b64encode(fileData); // Converte para Base64 string
@@ -23,7 +23,7 @@ export const options = {
 export default function () {
   const index = __VU - 1;
 
-  // ✅ Validação para evitar erros se faltar dados
+  // Validação para evitar erros se faltar dados
   if (index >= dados.suspeita_fraude.devid.length) {
     console.error(`🚨 Não há dados suficientes para o VU ${__VU}`);
     return;
