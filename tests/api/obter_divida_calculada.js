@@ -1,24 +1,30 @@
 import http from "k6/http";
 import { check } from "k6";
 
-
-
 const dados = JSON.parse(open("../../data/values.json"));
+const _url = __ENV.URL;
+const _auth = dados.config.token;
+const _carcod = dados.config.carcod;
+const _empcod = dados.config.empcod;
+
+export let options = {
+  vus: 1, // usuários virtuais
+  duration: "10s", // duração do teste
+};
 
 export default function () {
-  
-  const _url = __ENV.URL
-  const _auth = __ENV.AUTH
-  const _carcod = __ENV.CARCOD
-  const _empcod = __ENV.EMPCOD
+  const index = __VU - 1;
 
-  const _dateTime = new Date()
+  const _dateTime = new Date();
 
-  const _date = String(_dateTime.getDate()).padStart(2, '0') + '/' +
-    String(_dateTime.getMonth()).padStart(2, '0') + '/' +
-    _dateTime.getFullYear()
+  const _date =
+    String(_dateTime.getDate()).padStart(2, "0") +
+    "/" +
+    String(_dateTime.getMonth()).padStart(2, "0") +
+    "/" +
+    _dateTime.getFullYear();
 
-  const _value = dados.gerar_acordo[__VU - 1];
+  const _value = dados.obter_divida_calculada.devid[index];
 
   const payload = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sis="siscobra">
    <soapenv:Header/>
@@ -37,17 +43,36 @@ export default function () {
               </sis:Xmlin>
         </sis:WSAssessoria.Execute>
     </soapenv:Body>
-</soapenv:Envelope>`
+</soapenv:Envelope>`;
 
   const headers = {
     "Content-Type": " application/xml",
   };
 
-  const res = http.post(_url + "awsassessoria#obter_divida_calculada", payload, {headers});
+const res = http.post(
+  _url + "awsassessoria#obter_divida_calculada",
+  payload,
+  { headers }
+);
 
+  console.log(res.body)
   
 
-  check(res, {
-    "status 200": (r) => r.status === 200,
-  });
+// const xmloutMatch = res.body.match(/<Xmlout>([\s\S]*?)<\/Xmlout>/i);
+
+//   if (!xmloutMatch) {
+//     console.error('Não encontrou a tag <Xmlout> no response');
+//     check(res, { 'Retorno positivo': () => false });
+//   } else {
+//     // decodificar entidades HTML
+//     const xmlText = xmloutMatch[1]
+//       .replace(/&lt;/g, '<')
+//       .replace(/&gt;/g, '>');
+
+//     check(res, {
+//       'Retorno positivo': () =>
+//         /<\s*dividas_calculadas\s*>[\s\S]*?<\s*produtos\s*>[\s\S]*?<\s*produto\s*>/i.test(xmlText),
+//     });
+//   }
+
 }

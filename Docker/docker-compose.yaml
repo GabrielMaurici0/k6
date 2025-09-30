@@ -5,6 +5,7 @@ networks:
 services:
   influxdb:
     image: influxdb:1.8
+    container_name: influxdb
     networks:
       - grafana
     ports: 
@@ -14,6 +15,7 @@ services:
 
   grafana:
     image: grafana/grafana:latest
+    container_name: grafana
     networks:
       - grafana
     ports:

@@ -3,16 +3,22 @@ import { check } from "k6";
 
 const dados = JSON.parse(open("../../data/values.json"));
 
-export default function () {
-  
-  const _url = __ENV.URL
-  const _auth = __ENV.AUTH
-  const _carcod = __ENV.CARCOD
-  const _empcod = __ENV.EMPCOD
+export let options = {
+  vus: 2, // usuários virtuais
+  duration: "5s", // duração do teste
+};
 
-  const _cpfValue = dados.pagamento_acordo_receptivo.cpf[__VU - 1];
-  const _dddValue = dados.pagamento_acordo_receptivo.ddd[__VU - 1];
-  const _telefoneValue = dados.pagamento_acordo_receptivo.telefone[__VU - 1];
+export default function () {
+  const index = __VU - 1;
+  
+  const _url = __ENV.URL;
+  const _auth = dados.config.token;
+  const _carcod = dados.config.carcod;
+  const _empcod = dados.config.empcod;
+
+  const _cpfValue = dados.pagamento_acordo_receptivo.cpf[index];
+  const _dddValue = dados.pagamento_acordo_receptivo.ddd[index];
+  const _telefoneValue = dados.pagamento_acordo_receptivo.telefone[index];
 
   const payload = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sis="siscobra">
    <soapenv:Header/>
@@ -37,11 +43,15 @@ export default function () {
     "Content-Type": " application/xml",
   };
 
-  const res = http.post(_url + "awsassessoria#pagamento_acordo_receptivo", payload, {headers});
+  const res = http.post(
+    _url + "awsassessoria#pagamento_acordo_receptivo",
+    payload,
+    { headers }
+  );
 
-  
+check(res, {
+  'Retorno positivo': (r) =>
+    /<meio_pagamento>\s*<ass_cod>/i.test(r.body),
+});
 
-  check(res, {
-    "status 200": (r) => r.status === 200,
-  });
 }
