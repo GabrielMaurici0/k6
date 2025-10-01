@@ -145,11 +145,22 @@ declare -A test_map_browser=(
 )
 
 declare -A test_map_api_wsfraude=(
-    [1]="Sem Opções..."
+    [1]="fraudeAprovar.js"
+    [2]="fraudeReprovar.js"
+    [3]="fraudeCancelar.js"
 ) 
 
 declare -A test_map_api_wsusuario=(
-    [1]="Sem Opções..."
+    [1]="listPermission.js"
+    [2]="listPermissionUser.js"
+    [3]="addPermissionUser.js"
+    [4]="removePermissionUser.js"
+    [5]="listUser.js"
+    [6]="createUser.js"
+    [7]="statusUser.js"
+    [8]="updateUser.js"
+    [9]="listGroup.js"
+    [10]="listGroupUser.js"
 ) 
 
 
