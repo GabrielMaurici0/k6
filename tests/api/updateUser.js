@@ -22,7 +22,7 @@ export default function () {
   const _pgc = dados.updateUser.privilegio[index];
 
   const headers = {
-    Authorization: _auth,
+    "Authorization": _auth,
     "UserCode": _user,
     "UserEmail": _email,
     "Content-Type": "application/json",
