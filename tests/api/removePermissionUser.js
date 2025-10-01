@@ -18,9 +18,9 @@ export default function () {
   const _code = dados.removePermissionUser.privilegio[index];
 
   const headers = {
-    Authorization: _auth,
-    UserCode: _user,
-    UserEmail: _email,
+    "Authorization": _auth,
+    "UserCode": _user,
+    "UserEmail": _email,
     "Content-Type": "application/json",
   };
 

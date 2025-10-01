@@ -13,7 +13,7 @@ export const options = {
 };
 
 export default function () {
-  const index = [__VU - 1];
+  const index = __VU - 1;
   const _code = dados.statusUser.code[index];
   const _email = dados.statusUser.email[index];
 
