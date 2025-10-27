@@ -7,10 +7,14 @@ import { createWriteStream } from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const jsonPath = path.join(__dirname, "arquivos.json");
+const jsonPath = path.join(__dirname, "files.json");
 
 async function gerarArquivo(client, nomeArquivo, sql) {
-  const filePath = path.join(__dirname, nomeArquivo);
+  const tempDir = path.join(__dirname, "../temp");
+  await fs.mkdir(tempDir, { recursive: true }); 
+
+  const filePath = path.join(tempDir, nomeArquivo);
+
   const stream = client.query(copyTo(sql));
   const fileStream = createWriteStream(filePath);
 
@@ -18,7 +22,7 @@ async function gerarArquivo(client, nomeArquivo, sql) {
     stream.pipe(fileStream);
 
     fileStream.on("finish", () => {
-      console.log(`${nomeArquivo} gerado.`);
+      console.log(`${nomeArquivo} gerado em ${filePath}`);
       resolve();
     });
 
@@ -54,8 +58,7 @@ export async function gerarArquivos(client) {
     });
 
     await Promise.all(promessas);
-
-    console.log("Todos os arquivos foram gerados com sucesso.");
+    console.log("✅ Todos os arquivos foram gerados com sucesso em ../temp/");
   } catch (err) {
     console.error("Erro ao ler o arquivo de mapeamento JSON:", err);
   }

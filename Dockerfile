@@ -6,7 +6,9 @@ WORKDIR /usr/src/k6-app
 RUN apk update && \
     apk add --no-cache nodejs npm bash
 
-RUN npm install --save-dev @types/pg
+RUN npm install --save-dev @types/pg && \
+    npm install --save pg && \
+    npm install --save pg-copy-streams 
 
 COPY . .
 

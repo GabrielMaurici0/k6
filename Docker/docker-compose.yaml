@@ -28,10 +28,14 @@ services:
     networks:
       - K6TestManager
 
-  K6TestManager: 
+  K6TestManager:
     image: k6testmanager:latest
+    container_name: k6testmanager
+    env_file:
+      - ../.env
     networks:
       - K6TestManager
+
 
 networks:
   K6TestManager: 
