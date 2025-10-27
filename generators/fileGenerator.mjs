@@ -58,7 +58,7 @@ export async function gerarArquivos(client) {
     });
 
     await Promise.all(promessas);
-    console.log("✅ Todos os arquivos foram gerados com sucesso em ../temp/");
+    console.log("Todos os arquivos foram gerados com sucesso em ../temp/");
   } catch (err) {
     console.error("Erro ao ler o arquivo de mapeamento JSON:", err);
   }
