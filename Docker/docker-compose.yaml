@@ -1,23 +1,17 @@
-networks:
-  k6:
-  grafana:
-
 services:
   influxdb:
     image: influxdb:1.8
     container_name: influxdb
-    networks:
-      - grafana
     ports: 
       - "8086:8086"
     environment:
       - INFLUXDB_DB=k6
+    networks:
+      - K6TestManager
 
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
-    networks:
-      - grafana
     ports:
       - "3000:3000"
     volumes:
@@ -31,3 +25,14 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - K6TestManager
+
+  K6TestManager: 
+    image: k6testmanager:latest
+    networks:
+      - K6TestManager
+
+networks:
+  K6TestManager: 
+    driver: bridge

@@ -12,8 +12,12 @@ export const options = {
 };
 
 export default function () {
-    const index = __VU - 1;
-    
+  const index = __VU - 1; 
+  if (index >= dados.createUser.name.length) {
+    console.error(`Não há dados suficientes para o VU ${__VU}`);
+    return;
+  }
+  
   const _name = dados.createUser.name[index];
   const _email = dados.createUser.email[index];
   const _cpf = dados.createUser.cpf[index];
@@ -24,12 +28,10 @@ export default function () {
   const _group = dados.createUser.gruop[index];
   const _status = dados.createUser.status[index];
   const _azureAD = dados.createUser.azureAD[index];
-
   const headers = {
     "Authorization": _auth,
     "Content-Type": "application/json",
   };
-
   const payload = JSON.stringify({
     userName: _name,
     userEmail: _email,

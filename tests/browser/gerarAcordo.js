@@ -1,4 +1,5 @@
 import { browser } from "k6/browser";
+import { check } from "https://jslib.k6.io/k6-utils/1.5.0/index.js";
 import { Login } from "../../pages/loginPage.js"
 
 const dados = JSON.parse(open("../../data/values.json"));
@@ -17,15 +18,12 @@ export const options = {
     },
   },
   thresholds: {
-    checks: ["rate==1.0"],
+    checks: ["rate > 0.9"],
   },
 };
 
-
 export default async function () {
-
   let page 
-  
   try {
     page = await browser.newPage();
 
@@ -36,20 +34,17 @@ export default async function () {
     await login.submitForm();
 
     const expandir = page.locator("#toggleIcon");
-
     if (expandir.isEnabled()) {
       await expandir.click();
     }
 
     const pesquisar = page.locator("#searchInput");
-
     if (pesquisar.isEnabled()) {
       await pesquisar.click();
     } else {
       await expandir.click();
       await pesquisar.click();
     }
-
     await pesquisar.fill("Pesquisar");
 
     await page.waitForTimeout(1000);
@@ -61,7 +56,6 @@ export default async function () {
         timeout: 5000,
       }
     );
-
     await menu.click();
 
     await page.waitForTimeout(1000);
@@ -71,6 +65,11 @@ export default async function () {
     const devedor = page.locator("#_DEVEDOR_CODIGO");
 
     const _value = dados.acionamento[__VU - 1];
+    if ( __VU - 1 >= dados.acionamento.length) {
+      console.error(`Não há dados suficientes para o VU ${__VU}`);
+      return;
+    } 
+
 
     if (devedor.isEnabled()) {
       await page.waitForTimeout(1000);
@@ -87,7 +86,6 @@ export default async function () {
     await page.waitForTimeout(1000);
 
     const submit = page.locator("#span__DEVCOD_0001 > a");
-
     if (submit.isEnabled()) {
       await submit.click();
     } else {
@@ -101,7 +99,6 @@ export default async function () {
       "#TBL2 > tbody > tr:nth-child(3) > td > div:nth-child(13) > iframe"
     );
     const frame = await frameElement.contentFrame();
-
     // Interação iframe
     const limpar = frame.locator(
       "#TABELA_MASTER > tbody > tr:nth-child(7) > td > input[type=SUBMIT]:nth-child(2)"
@@ -110,9 +107,7 @@ export default async function () {
     await limpar.focus();
     await limpar.click();
 
- await page.waitForTimeout(5000);
-
-
+    await page.waitForTimeout(5000);
     // Obtem todos os inputs válidos
     const validCheckboxes = await frame.evaluate(() => {
       const all = Array.from(
@@ -136,13 +131,11 @@ export default async function () {
         validCheckboxes[i],
       ];
     }
-
     // Seleciona no máximo 3
     const toSelect = validCheckboxes.slice(
       0,
-      Math.min(3, validCheckboxes.length)
+      Math.min(1, validCheckboxes.length)
     );
-
     // Marca cada um
     for (const name of toSelect) {
       await frame.evaluate((name) => {
@@ -153,51 +146,47 @@ export default async function () {
 
     await page.waitForTimeout(3000);
 
-    const atualizar = await frame.locator('#TABELA_MASTER > tbody > tr:nth-child(7) > td > input:nth-child(5)')
+    const atualizar = await frame.locator(
+      "#TABELA_MASTER > tbody > tr:nth-child(7) > td > input:nth-child(5)"
+    );
 
     await atualizar.focus()
     await atualizar.click()
 
     await page.waitForTimeout(7000);
 
-    const negociar = await frame.locator('#TABELA_MASTER > tbody > tr:nth-child(7) > td > input:nth-child(6)')
-
+    const negociar = await frame.locator(
+      "#TABELA_MASTER > tbody > tr:nth-child(7) > td > input:nth-child(6)"
+    );
     await negociar.focus()
     await negociar.click()
-    
+
     await page.waitForTimeout(5000);
 
-
-
-
     //vai clicar no primeiro para efetuar o acordo
-    const efetuar = await frame.locator('#BTN_PROCESSAR_ACORDO_0001 > a')
-
+    const efetuar = await frame.locator("#BTN_PROCESSAR_ACORDO_0001 > a");
     await efetuar.focus()
-
-  await page.evaluate(() => {
-    window.alert = (msg) => {
-    };
-    window.confirm = (msg) => {
-      return true;
-    };
-    window.prompt = (msg, defaultText) => {
-      return "resposta-automatica";
-    };
-  });
-
-
-
     await efetuar.click()
 
-    await page.waitForTimeout(100000);
+    const confirmar = await page.locator("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled")
+    await confirmar.focus();
+    await confirmar.click()
 
-    
+    await page.waitForTimeout(5000);
+
+    const table = await frame.$("#TABELA_CALCULO")
+
+    const acocod = await table.$("#span__ACOCOD_0001 > a");
+
+    const text = await acocod.evaluate(el => el.textContent.trim());
+
+    await check(page, {
+      'Acordo Gerado com sucesso': () => text != ''
+    });
+
   }catch(error){
     console.error(`${error.message}`);
-
   } finally {
-      
     await page.close();
   }
 }

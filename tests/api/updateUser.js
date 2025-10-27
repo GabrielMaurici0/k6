@@ -13,6 +13,11 @@ export const options = {
 
 export default function () {
   const index = __VU - 1;
+  if (index >= dados.updateUser.usuario.length) {
+    console.error(`Não há dados suficientes para o VU ${__VU}`);
+    return;
+  }      
+
   const _user = dados.updateUser.usuario[index];
   const _email = dados.updateUser.email[index];
   const _name = dados.updateUser.nome[index];
@@ -20,14 +25,12 @@ export default function () {
   const _bday = dados.updateUser.bday[index];
   const _phone = dados.updateUser.phone[index];
   const _pgc = dados.updateUser.privilegio[index];
-
   const headers = {
     "Authorization": _auth,
     "UserCode": _user,
     "UserEmail": _email,
     "Content-Type": "application/json",
   };
-
   const payload = JSON.stringify({
   userName: _name ,
   userCPF: _cpf,

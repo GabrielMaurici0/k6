@@ -13,10 +13,14 @@ export const options = {
 
 export default function () {
   const index = __VU - 1;
+  if (index >= dados.removePermissionUser.usuario.length) {
+    console.error(`Não há dados suficientes para o VU ${__VU}`);
+    return;
+  }      
+
   const _user = dados.removePermissionUser.usuario[index];
   const _email = dados.removePermissionUser.email[index];
   const _code = dados.removePermissionUser.privilegio[index];
-
   const headers = {
     "Authorization": _auth,
     "UserCode": _user,

@@ -18,15 +18,18 @@ export class Login {
 
   async goto() {
     const _url = __ENV.URL;
-    await this.page.goto(_url+'hsiscobra');
+    await this.page.goto(_url + "hsiscobra");
   }
 
   async submitForm() {
     const _user = __ENV.USER;
     const _pass = __ENV.PASS; 
+
     await this.userField.fill(_user); 
     await this.passField.fill(_pass);
+
     await this.submitButton.click(); 
+
     await this.page.waitForTimeout(2000);
 
     if (await this.checkButton.isVisible()) {
@@ -48,6 +51,7 @@ export class Login {
         }
       } 
     }
+    
     await this.page.waitForLoadState("domcontentloaded");
   }
 }

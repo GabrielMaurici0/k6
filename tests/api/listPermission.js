@@ -6,20 +6,18 @@ const dados = JSON.parse(open("../../data/values.json"));
 const _url = __ENV.URL;
 const _auth = dados.config.token;
 
-
 export const options = {
   vus: 1, // número de usuários virtuais
-    //duration: "1s", // duração total do teste
-    iteration:1,
+  iterations: 1,
+  //duration: "1s", // duração total do teste
 };
 
 export default function () {
   const headers = {
     "Authorization": _auth,
   };
-
-    const res = http.get(`${_url}awsusuario/ListPermission`, { headers });
-    
+  
+  const res = http.get(`${_url}awsusuario/ListPermission`, { headers }); 
     
   check(res, {
     "Status code 200": (r) => r.status === 200,

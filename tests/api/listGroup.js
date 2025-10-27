@@ -9,14 +9,14 @@ const _auth = dados.config.token;
 export const options = {
   vus: 1, // número de usuários virtuais
   //duration: "1s", // duração total do teste
-  iteration: 1,
+  iterations: 1,
 };
 
 export default function () {
   const headers = {
     "Authorization": _auth,
   };
-
+  
   const res = http.get(`${_url}awsusuario/ListGroup`, { headers });
 
   check(res, {

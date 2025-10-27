@@ -9,14 +9,18 @@ const _auth = dados.config.token;
 export const options = {
   vus: 1, // número de usuários virtuais
   //duration: "1s", // duração total do teste
-  iteration: 1,
+  iterations: 1,
 };
 
 export default function () {
   const index = __VU - 1;
+  if (index >= dados.statusUser.code.length) {
+    console.error(`Não há dados suficientes para o VU ${__VU}`);
+    return;
+  }      
+
   const _code = dados.statusUser.code[index];
   const _email = dados.statusUser.email[index];
-
   const headers = {
     "Authorization": _auth,
     "UserCode": _code,

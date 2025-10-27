@@ -8,15 +8,14 @@ const _auth = dados.config.token;
 
 export const options = {
   vus: 1, // número de usuários virtuais
-  iteration: 1, //duration: "5s", // duração total do teste
+  iterations: 1, //duration: "5s", // duração total do teste
 };
 
 export default function () {
   const index = __VU - 1;
-
   // Validação para evitar erros se faltar dados
   if (index >= dados.fraudeAprovar.fraude.length) {
-    console.error(`🚨 Não há dados suficientes para o VU ${__VU}`);
+    console.error(`Não há dados suficientes para o VU ${__VU}`);
     return;
   }
 
@@ -24,14 +23,11 @@ export default function () {
   const _fracod = dados.fraudeAprovar.fraude[index];
   const _user = dados.fraudeAprovar.usuario[index];
   const _obs = dados.fraudeAprovar.observacao[index];
-
-
-    const payload = {
-      idFraude: _fracod,
-      usuarioAcao: _user,
-      observacao: _obs,
-    };
-
+  const payload = {
+    idFraude: _fracod,
+    usuarioAcao: _user,
+    observacao: _obs,
+  };
   const headers = {
     "Content-Type": "application/json",
     Authorization: _auth,

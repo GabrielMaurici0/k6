@@ -7,7 +7,6 @@ const dados = JSON.parse(open("../../data/values.json"));
 const _url = __ENV.URL;
 const _auth = dados.config.token;
 
-
 const arquivosBase64 = dados.fraudeReprovar.arquivo.map((path) => {
   const fileData = open(path, "b"); // Retorna ArrayBuffer
   return encoding.b64encode(fileData); // Converte para Base64 string
@@ -15,15 +14,13 @@ const arquivosBase64 = dados.fraudeReprovar.arquivo.map((path) => {
 
 export const options = {
   vus: 1, // número de usuários virtuais
-  iteration:1//duration: "5s", // duração total do teste
+  iterations:1//duration: "5s", // duração total do teste
 };
 
 export default function () {
   const index = __VU - 1;
-
-  // ✅ Validação para evitar erros se faltar dados
   if (index >= dados.fraudeReprovar.fraude.length) {
-    console.error(`🚨 Não há dados suficientes para o VU ${__VU}`);
+    console.error(`Não há dados suficientes para o VU ${__VU}`);
     return;
   }
 
@@ -32,23 +29,23 @@ export default function () {
   const _user = dados.fraudeReprovar.usuario[index];
   const _obs = dados.fraudeReprovar.observacao[index];
   const _base64 = arquivosBase64[index];
-
-    let payload;
-    
-    if (arquivosBase64[index] != null) {
-        payload = {
-        idFraude: _fracod,
-        usuarioAcao: _user,
-        observacao: _obs,
-        anexo: _base64
-        };
-    } else { 
-        payload = {
-        idFraude: _fracod,
-        usuarioAcao: _user,
-        observacao: _obs
-        };
-    }
+  let payload;
+  
+  if (arquivosBase64[index] != null) {
+      payload = {
+      idFraude: _fracod,
+      usuarioAcao: _user,
+      observacao: _obs,
+      anexo: _base64
+      };
+  } else { 
+      payload = {
+      idFraude: _fracod,
+      usuarioAcao: _user,
+      observacao: _obs
+      };
+  }
+  
   const headers = {
     "Content-Type": "application/json",
     "Authorization": _auth,
