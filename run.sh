@@ -93,7 +93,25 @@ verify_docker() {
             echo -e "✅ ${GREEN}${service^} está em execução${NC}"
         else
             echo -e "🔄 ${YELLOW}Iniciando serviço $service...${NC}"
-            docker start "$service"
+            
+            # Tenta iniciar o container
+            if ! docker start "$service" >/dev/null 2>&1; then
+                echo -e "❌ ${RED}Falha ao iniciar o serviço $service${NC}"
+                echo -e "${YELLOW}Pressione ENTER para sair...${NC}"
+                read -r
+                exit 1
+            fi
+
+            # Valida se realmente subiu
+            sleep 2
+            if ! docker ps --format '{{.Names}}' | grep -qE "^${service}$"; then
+                echo -e "❌ ${RED}Serviço $service não está em execução após tentar iniciar.${NC}"
+                echo -e "${YELLOW}Pressione ENTER para sair...${NC}"
+                read -r
+                exit 1
+            else
+                echo -e "✅ ${GREEN}${service^} iniciado com sucesso${NC}"
+            fi
         fi
     done
 }
@@ -104,7 +122,7 @@ run_test() {
     local type=$1
     local test_file=$2
     export $(grep -v '^#' .env | xargs)
-    verify_docker
+    #verify_docker
     sleep 2
 
     clear
@@ -112,9 +130,9 @@ run_test() {
     echo "--------------------------------------------"
 
     if [[ $type == "api" ]]; then
-        k6 run --out influxdb=localhost:8086/k6 --tag test_type=api "tests/api/$test_file"
+        k6 run --out influxdb=http://influxdb:8086/k6 --tag test_type=api "tests/api/$test_file"
     else
-        K6_BROWSER_HEADLESS=false k6 run --out influxdb=localhost:8086/k6 --tag test_type=browser "tests/browser/$test_file"
+        k6 run --out influxdb=http://influxdb:8086/k6 --tag test_type=browser "tests/browser/$test_file"
     fi
 
     finish_message
@@ -140,7 +158,7 @@ declare -A test_map_api_wsassessoria=(
 )
 
 declare -A test_map_browser=(
-    [1]="acionamento.js"
+    [1]="acionamentoEstatico.js"
     [2]="gerarAcordo.js"
 )
 
