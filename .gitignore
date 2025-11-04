@@ -23,3 +23,6 @@ docker-compose.override.yml
 
 #backup
 backup/
+
+#arquivos de acionamento
+*.txt

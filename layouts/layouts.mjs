@@ -1,9 +1,14 @@
+const dados = JSON.parse(open("../../data/values.json"));
+
+let assessoria = dados.importacaoAcionamento.assessoria
+assessoria = Number(assessoria)
+
 export const layouts = {
   //layout 1
   //sem inc
   l1_ok: `
     COPY (
-        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004201' || '0000000001'
+        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}01' || '0000000001'
         UNION ALL
         (
             SELECT
@@ -12,7 +17,7 @@ export const layouts = {
                 to_char(current_date + 3, 'YYYYMMDD') ||
                 rpad('Gabriel Mauricio', 50, ' ') || 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 3
         )
         UNION ALL
@@ -23,7 +28,7 @@ export const layouts = {
   `,
   l1_1inc: `
     COPY (
-    SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004201' || '0000000001'
+    SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}01' || '0000000001'
         union all(
           SELECT
                 '4001' || rpad(devid, 20, ' ') || rpad(devempcod::text, 20, ' ') ||
@@ -31,7 +36,7 @@ export const layouts = {
                 to_char(current_date + 3, 'YYYYMMDD') ||
                 rpad('', 50, ' ') || 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 1
         )
         UNION ALL
@@ -42,7 +47,7 @@ export const layouts = {
                 to_char(current_date + 3, 'YYYYMMDD') ||
                 rpad('Gabriel Mauricio', 50, ' ') || 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 2
         )
         UNION ALL
@@ -60,7 +65,7 @@ export const layouts = {
         'Gabriel Mauricio' AS nome,
         'acionado' AS status,
         1 AS empresa_alvo,
-        42 AS carteira_alvo
+        ${assessoria} AS carteira_alvo
 ),
 base_devedor AS (
     SELECT 
@@ -76,7 +81,7 @@ base_devedor AS (
     ORDER BY random() LIMIT 10
 ),
 registros AS (
-    SELECT '000' || data_cabecalho || '004201' || '0000000001' AS linha
+    SELECT '000' || data_cabecalho || '00${assessoria}01' || '0000000001' AS linha
     FROM parametros
     UNION ALL(
     SELECT '4001' || rpad(devid, 20, ' ') || rpad('2', 20, ' ') ||
@@ -118,19 +123,19 @@ SELECT * FROM registros) TO STDOUT;
 WITH primeiro AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 1
 ),
 restantes AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 2
 )
 SELECT
-  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004201' || '0000000001'
+  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}01' || '0000000001'
 UNION ALL
 SELECT
   '4001' ||
@@ -172,7 +177,7 @@ UNION ALL
   `,
   l1_dist_dev: `
     COPY (
-        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004201' || '0000000001'
+        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}01' || '0000000001'
         UNION ALL
         (
             SELECT
@@ -191,7 +196,7 @@ UNION ALL
                 to_char(current_date + 3, 'YYYYMMDD') ||
                 rpad('Gabriel Mauricio', 50, ' ') || 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 2
         )
         UNION ALL
@@ -204,7 +209,7 @@ UNION ALL
   // Com inconsistências tratadas
   l1_ok_fix: `
     COPY (
-        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004201' || '0000000001'
+        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}01' || '0000000001'
         UNION ALL
         (
             SELECT
@@ -213,7 +218,7 @@ UNION ALL
                 to_char(current_date + 3, 'YYYYMMDD') ||
                 rpad('Gabriel Mauricio', 50, ' ') || 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 3
         )
         UNION ALL
@@ -224,7 +229,7 @@ UNION ALL
   `,
   l1_1inc_fix: `
     COPY (
-    SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004201' || '0000000001'
+    SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}01' || '0000000001'
         union all(
           SELECT
                 '4001' || rpad(devid, 20, ' ') || rpad(devempcod::text, 20, ' ') ||
@@ -232,7 +237,7 @@ UNION ALL
                 to_char(current_date + 3, 'YYYYMMDD') ||
                 rpad('', 50, ' ') || 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 1
         )
         UNION ALL
@@ -243,7 +248,7 @@ UNION ALL
                 to_char(current_date + 3, 'YYYYMMDD') ||
                 rpad('Gabriel Mauricio', 50, ' ') || 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 2
         )
         UNION ALL
@@ -261,7 +266,7 @@ UNION ALL
         'Gabriel Mauricio' AS nome,
         'acionado' AS status,
         1 AS empresa_alvo,
-        42 AS carteira_alvo
+        ${assessoria} AS carteira_alvo
 ),
 base_devedor AS (
     SELECT 
@@ -277,7 +282,7 @@ base_devedor AS (
     ORDER BY random() LIMIT 10
 ),
 registros AS (
-    SELECT '000' || data_cabecalho || '004201' || '0000000001' AS linha
+    SELECT '000' || data_cabecalho || '00${assessoria}01' || '0000000001' AS linha
     FROM parametros
     UNION ALL(
     SELECT '4001' || rpad(devid, 20, ' ') || rpad('2', 20, ' ') ||
@@ -319,19 +324,19 @@ SELECT * FROM registros) TO STDOUT;
 WITH primeiro AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 1
 ),
 restantes AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 2
 )
 SELECT
-  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004201' || '0000000001'
+  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}01' || '0000000001'
 UNION ALL
 SELECT
   '4001' ||
@@ -373,7 +378,7 @@ UNION ALL
   `,
   l1_dist_dev_fix: `
      COPY (
-        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004201' || '0000000001'
+        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}01' || '0000000001'
         UNION ALL
         (
             SELECT
@@ -392,7 +397,7 @@ UNION ALL
                 to_char(current_date + 3, 'YYYYMMDD') ||
                 rpad('Gabriel Mauricio', 50, ' ') || 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 2
         )
         UNION ALL
@@ -405,7 +410,7 @@ UNION ALL
   //sem inc
   l2_ok: `
     COPY (
-        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004202' || '0000000001'
+        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}02' || '0000000001'
         UNION ALL
         (
             SELECT
@@ -417,7 +422,7 @@ UNION ALL
                 rpad('',70,' ') 
                 || 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 3
         )
         UNION ALL
@@ -428,7 +433,7 @@ UNION ALL
   `,
   l2_1inc: `
     COPY (
-       SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004202' || '0000000001'
+       SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}02' || '0000000001'
 UNION ALL
 (
     SELECT
@@ -440,7 +445,7 @@ UNION ALL
         rpad('',70,' ') 
         || 'acionado'
     FROM devedor d
-    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
     ORDER BY random() LIMIT 1
 )
 UNION ALL
@@ -454,7 +459,7 @@ UNION ALL
         rpad('',70,' ') 
         || 'acionado'
     FROM devedor d
-    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
     ORDER BY random() LIMIT 2
 )
 UNION ALL
@@ -472,7 +477,7 @@ UNION ALL
         'Gabriel Mauricio' AS nome,
         'acionado' AS status,
         1 AS empresa_alvo,
-        42 AS carteira_alvo
+        ${assessoria} AS carteira_alvo
 ),
 base_devedor AS (
     SELECT 
@@ -488,7 +493,7 @@ base_devedor AS (
     ORDER BY random() LIMIT 10
 ),
 registros AS (
-    SELECT '000' || data_cabecalho || '004202' || '0000000001' AS linha
+    SELECT '000' || data_cabecalho || '00${assessoria}02' || '0000000001' AS linha
     FROM parametros
     UNION ALL(
     SELECT '4001' || rpad(devid, 20, ' ') || rpad('2', 20, ' ') ||
@@ -542,19 +547,19 @@ SELECT * FROM registros)TO STDOUT;
 WITH primeiro AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 1
 ),
 restantes AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 2
 )
 SELECT
-  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004202' || '0000000001'
+  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}02' || '0000000001'
 UNION ALL
 SELECT
     '4001' ||
@@ -602,19 +607,19 @@ UNION ALL
 WITH primeiro AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 1
 ),
 restantes AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 2
 )
 SELECT
-  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004202' || '0000000001'
+  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}02' || '0000000001'
 UNION ALL
 SELECT
     '4001' ||
@@ -651,19 +656,19 @@ UNION ALL
     WITH primeiro AS (
       SELECT devid, devempcod
       FROM devedor d
-      WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+      WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
       ORDER BY random()
       LIMIT 1
     ),
     restantes AS (
       SELECT devid, devempcod
       FROM devedor d
-      WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+      WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
       ORDER BY random()
       LIMIT 2
     )
     SELECT
-      '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004202' || '0000000001'
+      '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}02' || '0000000001'
     UNION ALL(
     SELECT
         '4001' ||
@@ -698,7 +703,7 @@ UNION ALL
   `,
   l2_dist_dev: `
 COPY (
-        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004202' || '0000000001'
+        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}02' || '0000000001'
         UNION ALL
         (
             SELECT
@@ -721,7 +726,7 @@ COPY (
                 rpad('47992353808',85,' ')||
                 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 2
         )
         UNION ALL
@@ -734,7 +739,7 @@ COPY (
   // Com inconsistências tratadas
   l2_ok_fix: `
         COPY (
-        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004202' || '0000000001'
+        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}02' || '0000000001'
         UNION ALL
         (
             SELECT
@@ -746,7 +751,7 @@ COPY (
                 rpad('',70,' ') 
                 || 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 3
         )
         UNION ALL
@@ -757,7 +762,7 @@ COPY (
   `,
   l2_1inc_fix: `
     COPY (
-       SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004202' || '0000000001'
+       SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}02' || '0000000001'
 UNION ALL
 (
     SELECT
@@ -769,7 +774,7 @@ UNION ALL
         rpad('',70,' ') 
         || 'acionado'
     FROM devedor d
-    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
     ORDER BY random() LIMIT 1
 )
 UNION ALL
@@ -783,7 +788,7 @@ UNION ALL
         rpad('',70,' ') 
         || 'acionado'
     FROM devedor d
-    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
     ORDER BY random() LIMIT 2
 )
 UNION ALL
@@ -801,7 +806,7 @@ UNION ALL
         'Gabriel Mauricio' AS nome,
         'acionado' AS status,
         1 AS empresa_alvo,
-        42 AS carteira_alvo
+        ${assessoria} AS carteira_alvo
 ),
 base_devedor AS (
     SELECT 
@@ -817,7 +822,7 @@ base_devedor AS (
     ORDER BY random() LIMIT 10
 ),
 registros AS (
-    SELECT '000' || data_cabecalho || '004202' || '0000000001' AS linha
+    SELECT '000' || data_cabecalho || '00${assessoria}02' || '0000000001' AS linha
     FROM parametros
     UNION ALL(
     SELECT '4001' || rpad(devid, 20, ' ') || rpad('2', 20, ' ') ||
@@ -871,19 +876,19 @@ SELECT * FROM registros)TO STDOUT;
 WITH primeiro AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 1
 ),
 restantes AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 2
 )
 SELECT
-  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004202' || '0000000001'
+  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}02' || '0000000001'
 UNION ALL
 SELECT
     '4001' ||
@@ -931,19 +936,19 @@ UNION ALL
 WITH primeiro AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 1
 ),
 restantes AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 2
 )
 SELECT
-  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004202' || '0000000001'
+  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}02' || '0000000001'
 UNION ALL
 SELECT
     '4001' ||
@@ -980,19 +985,19 @@ UNION ALL
     WITH primeiro AS (
       SELECT devid, devempcod
       FROM devedor d
-      WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+      WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
       ORDER BY random()
       LIMIT 1
     ),
     restantes AS (
       SELECT devid, devempcod
       FROM devedor d
-      WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+      WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
       ORDER BY random()
       LIMIT 2
     )
     SELECT
-      '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004202' || '0000000001'
+      '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}02' || '0000000001'
     UNION ALL(
     SELECT
         '4001' ||
@@ -1027,7 +1032,7 @@ UNION ALL
   `,
   l2_dist_dev_fix: `
     COPY (
-        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004202' || '0000000001'
+        SELECT '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}02' || '0000000001'
         UNION ALL
         (
             SELECT
@@ -1050,7 +1055,7 @@ UNION ALL
                 rpad('47992353808',85,' ')||
                 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 2
         )
         UNION ALL
@@ -1064,7 +1069,7 @@ UNION ALL
   l3_ok: `
         copy(
 SELECT 
-    '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004203' || '0000000001'
+    '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}03' || '0000000001'
 UNION ALL(
 SELECT
     '4001' ||
@@ -1082,7 +1087,7 @@ FROM devedor d
 WHERE devati = 0 
 AND devsal > 50 
 AND devempcod = 1 
-AND carcod = 42 
+AND carcod = ${assessoria} 
 ORDER BY random() 
 LIMIT 3)
 UNION ALL
@@ -1095,7 +1100,7 @@ SELECT
   l3_1inc: `
         COPY (
   SELECT 
-    '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004203' || '0000000001'
+    '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}03' || '0000000001'
   UNION ALL
   (
     SELECT 
@@ -1124,7 +1129,7 @@ SELECT
       RPAD('', 70, ' ') ||
       'acionado'
     FROM devedor d 
-    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42 
+    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria} 
     ORDER BY random() 
     LIMIT 1
   )
@@ -1156,7 +1161,7 @@ SELECT
       RPAD('', 70, ' ') ||
       'acionado'
     FROM devedor d 
-    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42 
+    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria} 
     ORDER BY random() 
     LIMIT 2
   )
@@ -1176,7 +1181,7 @@ WITH parametros AS (
         'Gabriel Mauricio' AS nome,
         'acionado' AS acionamento,
         1 AS empresa_alvo,
-        42 AS carteira_alvo
+        ${assessoria} AS carteira_alvo
 ),
 base_devedor AS (
     SELECT 
@@ -1192,7 +1197,7 @@ base_devedor AS (
     ORDER BY random() LIMIT 10
 ),
 registros AS (
-    SELECT '000' || data_cabecalho || '004203' || '0000000001' AS linha
+    SELECT '000' || data_cabecalho || '00${assessoria}03' || '0000000001' AS linha
     FROM parametros
     UNION ALL(
     SELECT '4001'||
@@ -1354,14 +1359,14 @@ copy(
 WITH primeiro AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 1
 ),
 restantes AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 2
 ),
@@ -1376,7 +1381,7 @@ linha_repetida_base AS (
   FROM primeiro
 )
 SELECT
-  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004203' || '0000000001'
+  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}03' || '0000000001'
 UNION ALL
 (
 SELECT
@@ -1439,7 +1444,7 @@ SELECT '999000003000000000000000003000000000000000000000000000000'
   l3_ok_fix: `
     COPY (
             SELECT 
-                '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004203' || '0000000001'
+                '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}03' || '0000000001'
             UNION ALL
             SELECT
                 '4001' ||
@@ -1464,7 +1469,7 @@ SELECT '999000003000000000000000003000000000000000000000000000000'
             WHERE devati = 0 
             AND devsal > 50 
             AND devempcod = 1 
-            AND carcod = 42 
+            AND carcod = ${assessoria} 
             ORDER BY random() 
             LIMIT 3
             UNION ALL
@@ -1475,7 +1480,7 @@ SELECT '999000003000000000000000003000000000000000000000000000000'
   l3_1inc_fix: `
             COPY (
   SELECT 
-    '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004203' || '0000000001'
+    '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}03' || '0000000001'
   UNION ALL
   (
     SELECT 
@@ -1504,7 +1509,7 @@ SELECT '999000003000000000000000003000000000000000000000000000000'
       RPAD('', 70, ' ') ||
       'acionado'
     FROM devedor d 
-    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42 
+    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria} 
     ORDER BY random() 
     LIMIT 1
   )
@@ -1536,7 +1541,7 @@ SELECT '999000003000000000000000003000000000000000000000000000000'
       RPAD('', 70, ' ') ||
       'acionado'
     FROM devedor d 
-    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42 
+    WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria} 
     ORDER BY random() 
     LIMIT 2
   )
@@ -1556,7 +1561,7 @@ WITH parametros AS (
         'Gabriel Mauricio' AS nome,
         'acionado' AS acionamento,
         1 AS empresa_alvo,
-        42 AS carteira_alvo
+        ${assessoria} AS carteira_alvo
 ),
 base_devedor AS (
     SELECT 
@@ -1572,7 +1577,7 @@ base_devedor AS (
     ORDER BY random() LIMIT 10
 ),
 registros AS (
-    SELECT '000' || data_cabecalho || '004203' || '0000000001' AS linha
+    SELECT '000' || data_cabecalho || '00${assessoria}03' || '0000000001' AS linha
     FROM parametros
     UNION ALL(
     SELECT '4001'||
@@ -1734,14 +1739,14 @@ SELECT * FROM registros)TO STDOUT;
 WITH primeiro AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 1
 ),
 restantes AS (
   SELECT devid, devempcod
   FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 42
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
   ORDER BY random()
   LIMIT 2
 ),
@@ -1756,7 +1761,7 @@ linha_repetida_base AS (
   FROM primeiro
 )
 SELECT
-  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '004203' || '0000000001'
+  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}03' || '0000000001'
 UNION ALL
 (
 SELECT

@@ -8,11 +8,12 @@ RUN apk update && \
 
 RUN npm install --save-dev @types/pg && \
     npm install --save pg && \
-    npm install --save pg-copy-streams 
+    npm install --save pg-copy-streams
 
 COPY . .
 
 RUN chmod +x ./run.sh
 
 # Comando padrão de execução
-ENTRYPOINT ["sh", "-c", "while true; do sleep 60; done"]
+ENTRYPOINT [ "sh", "-c", "node", "./database/triggerFilesGenerator.mjs", "&&", "while true; do sleep 60; done"]
+

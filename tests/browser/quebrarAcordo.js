@@ -65,11 +65,10 @@ export default async function () {
     const devedor = page.locator("#_DEVEDOR_CODIGO");
 
     const _value = dados.acionamento[__VU - 1];
-    if ( __VU - 1 >= dados.acionamento.length) {
+    if (__VU - 1 >= dados.acionamento.length) {
       console.error(`Não há dados suficientes para o VU ${__VU}`);
       return;
-    } 
-
+    }
 
     if (devedor.isEnabled()) {
       await page.waitForTimeout(1000);
@@ -150,31 +149,33 @@ export default async function () {
       "#TABELA_MASTER > tbody > tr:nth-child(7) > td > input:nth-child(5)"
     );
 
-    await atualizar.focus()
-    await atualizar.click()
+    await atualizar.focus();
+    await atualizar.click();
 
     await page.waitForTimeout(7000);
 
     const negociar = await frame.locator(
       "#TABELA_MASTER > tbody > tr:nth-child(7) > td > input:nth-child(6)"
     );
-    await negociar.focus()
-    await negociar.click()
+    await negociar.focus();
+    await negociar.click();
 
     await page.waitForTimeout(5000);
 
     //vai clicar no primeiro para efetuar o acordo
     const efetuar = await frame.locator("#BTN_PROCESSAR_ACORDO_0001 > a");
-    await efetuar.focus()
-    await efetuar.click()
+    await efetuar.focus();
+    await efetuar.click();
 
-    const confirmar = await page.locator("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled")
+    const confirmar = await page.locator(
+      "body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled"
+    );
     await confirmar.focus();
-    await confirmar.click()
+    await confirmar.click();
 
     await page.waitForTimeout(5000);
 
-    const table = await frame.$("#TABELA_CALCULO")
+    const table = await frame.$("#TABELA_CALCULO");
 
     const quebrar = await frame.locator("#BOTAO_QUEBRAR_ACORDO > a");
     await quebrar.focus();
@@ -182,22 +183,20 @@ export default async function () {
 
     await page.waitForTimeout(5000);
 
-    const historico = await page.locator("#W0346AGENDA > a"); 
+    const historico = await page.locator("#W0346AGENDA > a");
     await historico.focus();
     await historico.click();
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(7000);
 
+    const historicoElement = await page.$("#TBL2 > tbody > tr:nth-child(3) > td > div:nth-child(13) > iframe");
+    const ficha = await historicoElement.contentFrame();
 
-    const historicoElement = await page.$(
-      "#TABLE1"
-    );
-    const tableHistorico = await historicoElement.contentFrame();
-
-    const textoAcordo = await tableHistorico.$("#span__RETACA_0001")
+    const textoAcordo = await ficha.$("#span__RETACA_0001");
     const text = await textoAcordo.evaluate((el) => el.textContent.trim());
-    await check(page, {
-      'Acordo Quebrado com sucesso': () => text === 'Quebra de acordo'
+
+    await check(ficha, {
+      "Acordo Quebrado com sucesso": () => text.includes("Quebra de acordo"),
     });
 
   }catch(error){

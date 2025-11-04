@@ -122,7 +122,7 @@ run_test() {
     local type=$1
     local test_file=$2
     export $(grep -v '^#' .env | xargs)
-    #verify_docker
+    verify_docker
     sleep 2
 
     clear
@@ -130,9 +130,11 @@ run_test() {
     echo "--------------------------------------------"
 
     if [[ $type == "api" ]]; then
-        k6 run --out influxdb=http://influxdb:8086/k6 --tag test_type=api "tests/api/$test_file"
+        #k6 run --out influxdb=http://influxdb:8086/k6 --tag test_type=api "tests/api/$test_file"
+        k6 run --out influxdb=http://localhost:8086/k6 --tag test_type=api "tests/api/$test_file"
     else
-        k6 run --out influxdb=http://influxdb:8086/k6 --tag test_type=browser "tests/browser/$test_file"
+        #k6 run --out influxdb=http://influxdb:8086/k6 --tag test_type=browser "tests/browser/$test_file"
+        K6_BROWSER_HEADLESS=false k6 run --out influxdb=http://localhost:8086/k6 --tag test_type=browser "tests/browser/$test_file"
     fi
 
     finish_message
@@ -160,6 +162,8 @@ declare -A test_map_api_wsassessoria=(
 declare -A test_map_browser=(
     [1]="acionamentoEstatico.js"
     [2]="gerarAcordo.js"
+    [3]="quebrarAcordo.js"
+    [4]="importacaoAcionamento.js"
 )
 
 declare -A test_map_api_wsfraude=(

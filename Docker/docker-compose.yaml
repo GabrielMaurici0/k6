@@ -31,6 +31,8 @@ services:
   K6TestManager:
     image: k6testmanager:latest
     container_name: k6testmanager
+    volumes:
+      - ../temp/:/usr/src/k6-app/temp
     env_file:
       - ../.env
     networks:
