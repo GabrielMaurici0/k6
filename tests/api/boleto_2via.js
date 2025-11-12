@@ -1,25 +1,27 @@
 import http from "k6/http";
 import { check } from "k6";
+import { baseScenario } from "./config/scenario.config.js";
+import { globalThresholds } from "./config/globalThresholds.js";
 
-const dados = JSON.parse(open("../../data/values.json"));
+const dados = JSON.parse(open("../../database/values.json"));
 
-export let options = {
-  vus: 10, // usuários virtuais
-  duration: "30s", // duração do teste
+export const options = {
+  ...baseScenario,
+  thresholds: globalThresholds,
 };
 
 export default function () {
   const index = __VU - 1;
-  if (index >= dados.boleto_2via.devid.length) {
+  if (index >= dados.boleto_2via.devedor.length) {
     console.error(`Não há dados suficientes para o VU ${__VU}`);
     return;
   }
-  
+
   const _url = __ENV.URL;
   const _auth = dados.config.token;
-  const _carcod = dados.config.carcod;
-  const _empcod = dados.config.empcod;
-  const _devid = dados.boleto_2via.devid[index];
+  const _carteira = dados.config.carteira;
+  const _empresa = dados.config.empresa;
+  const _devedor = dados.boleto_2via.devedor[index];
   const _parcela = dados.boleto_2via.parcela[index];
   const _enviaWpp = dados.boleto_2via.envia_whats[index];
   const _telefone = dados.boleto_2via.telefone[index];
@@ -30,12 +32,12 @@ export default function () {
       <soapenv:Body>
         <sis:WSAssessoria.Execute>
           <sis:Token>${_auth}</sis:Token>
-          <sis:Carcod>${_carcod}</sis:Carcod>
+          <sis:Carcod>${_carteira}</sis:Carcod>
           <sis:Metodo>BOLETO_2VIA</sis:Metodo>
           <sis:Xmlin>
             &lt;obter_boleto_2via&gt;
-              &lt;cod_empresa&gt;${_empcod}&lt;/cod_empresa&gt;
-              &lt;cod_cliente&gt;${_devid}&lt;/cod_cliente&gt;
+              &lt;cod_empresa&gt;${_empresa}&lt;/cod_empresa&gt;
+              &lt;cod_cliente&gt;${_devedor}&lt;/cod_cliente&gt;
               &lt;cod_parcela&gt;${_parcela}&lt;/cod_parcela&gt;
               &lt;envia_whatsapp&gt;${_enviaWpp}&lt;/envia_whatsapp&gt; 
               &lt;cliente_whatsapp&gt;${_telefone}&lt;/cliente_whatsapp&gt; 

@@ -1,29 +1,23 @@
 import { browser } from "k6/browser";
 import { check } from "https://jslib.k6.io/k6-utils/1.5.0/index.js";
-import { Login } from "../../pages/loginPage.js"
+import { Login } from "./pages/loginPage.js";
+import { baseScenario } from "./config/scenario.config.js";
+import { globalThresholds } from "./config/globalThresholds.js";
 
-const dados = JSON.parse(open("../../data/values.json"));
+const dados = JSON.parse(open("../../database/values.json"));
 
 export const options = {
   scenarios: {
-    ui: {
-      executor: "shared-iterations",
-      iterations: 1, //quantia de vezes que vai executar
-      vus: 1, //quantia de janelas que vão ser abertas simultaneamente
-      options: {
-        browser: {
-          type: "chromium",
-        },
-      },
+    quebrarAcordo: {
+      ...baseScenario,
+      exec: "quebrarAcordo",
     },
   },
-  thresholds: {
-    checks: ["rate > 0.9"],
-  },
+  thresholds: globalThresholds,
 };
 
 export default async function () {
-  let page 
+  let page;
   try {
     page = await browser.newPage();
 
@@ -189,7 +183,9 @@ export default async function () {
 
     await page.waitForTimeout(7000);
 
-    const historicoElement = await page.$("#TBL2 > tbody > tr:nth-child(3) > td > div:nth-child(13) > iframe");
+    const historicoElement = await page.$(
+      "#TBL2 > tbody > tr:nth-child(3) > td > div:nth-child(13) > iframe"
+    );
     const ficha = await historicoElement.contentFrame();
 
     const textoAcordo = await ficha.$("#span__RETACA_0001");
@@ -198,12 +194,9 @@ export default async function () {
     await check(ficha, {
       "Acordo Quebrado com sucesso": () => text.includes("Quebra de acordo"),
     });
-
-  }catch(error){
+  } catch (error) {
     console.error(`${error.message}`);
   } finally {
     await page.close();
   }
 }
-
-

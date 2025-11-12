@@ -1,11 +1,13 @@
 import http from "k6/http";
 import { check } from "k6";
+import { baseScenario } from "./config/scenario.config.js";
+import { globalThresholds } from "./config/globalThresholds.js";
 
-const dados = JSON.parse(open("../../data/values.json"));
+const dados = JSON.parse(open("../../database/values.json"));
 
-export let options = {
-  vus: 10, // usuários virtuais
-  duration: "30s", // duração do teste
+export const options = {
+  ...baseScenario,
+  thresholds: globalThresholds,
 };
 
 export default function () {
@@ -14,27 +16,27 @@ export default function () {
     console.error(`Não há dados suficientes para o VU ${__VU}`);
     return;
   }
-  
+
   const _url = __ENV.URL;
   const _auth = dados.config.token;
-  const _carcod = dados.config.carcod;
-  const _empcod = dados.config.empcod;
-  const _inicio = dados.blocklist_listar.data_inicial[index];
-  const _fim = dados.blocklist_listar.data_final[index];
-  const _tipo = dados.blocklist_listar.tipo[index];
+  const _carteira = dados.config.carteira;
+  const _empresa = dados.config.empresa;
+  const _dataInicial = dados.blocklist_listar.data_inicial[index];
+  const _dataFinal = dados.blocklist_listar.data_final[index];
+  const _tipoBlocklist = dados.blocklist_listar.tipo_blocklist[index];
   const payload = `
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sis="siscobra">
       <soapenv:Body>
         <sis:WSAssessoria.Execute>
           <sis:Token>${_auth}</sis:Token>
-          <sis:Carcod>${_carcod}</sis:Carcod>
+          <sis:Carcod>${_carteira}</sis:Carcod>
           <sis:Metodo>BLOCKLIST_LISTAR</sis:Metodo>
           <sis:Xmlin>
             &lt;blocklist&gt; 
-              &lt;cod_empresa&gt;${_empcod}&lt;/cod_empresa&gt; 
-              &lt;dat_inicial&gt;${_inicio}&lt;/dat_inicial&gt; 
-              &lt;dat_final&gt;${_fim}&lt;/dat_final&gt; 
-              &lt;tip_blocklist&gt;${_tipo}&lt;/tip_blocklist&gt;  
+              &lt;cod_empresa&gt;${_empresa}&lt;/cod_empresa&gt; 
+              &lt;dat_inicial&gt;${_dataInicial}&lt;/dat_inicial&gt; 
+              &lt;dat_final&gt;${_dataFinal}&lt;/dat_final&gt; 
+              &lt;tip_blocklist&gt;${_tipoBlocklist}&lt;/tip_blocklist&gt;  
             &lt;/blocklist&gt;
           </sis:Xmlin>
         </sis:WSAssessoria.Execute>

@@ -1,13 +1,15 @@
 import http from "k6/http";
 import { check } from "k6";
-import encoding from "k6/encoding"; 
+import encoding from "k6/encoding";
+import { baseScenario } from "./config/scenario.config.js";
+import { globalThresholds } from "./config/globalThresholds.js";
 
 // Carrega os dados JSON no init stage
-const dados = JSON.parse(open("../../data/values.json"));
+const dados = JSON.parse(open("../../database/values.json"));
 const _url = __ENV.URL;
 const _auth = dados.config.token;
-const _carcod = dados.config.carcod;
-const _empcod = dados.config.empcod;
+const _carteira = dados.config.carteira;
+const _empresa = dados.config.empresa;
 
 const arquivosBase64 = dados.suspeita_fraude.arquivo.map((path) => {
   const fileData = open(path, "b"); // Retorna ArrayBuffer
@@ -15,20 +17,20 @@ const arquivosBase64 = dados.suspeita_fraude.arquivo.map((path) => {
 });
 
 export const options = {
-  vus: 1, // número de usuários virtuais
-  iterations:1//duration: "5s", // duração total do teste
+  ...baseScenario,
+  thresholds: globalThresholds,
 };
 
 export default function () {
   const index = __VU - 1;
   // Validação para evitar erros se faltar dados
-  if (index >= dados.suspeita_fraude.devid.length) {
+  if (index >= dados.suspeita_fraude.devedor.length) {
     console.error(`Não há dados suficientes para o VU ${__VU}`);
     return;
-  }    
+  }
 
   // Extrai dados para este VU
-  const _devid = dados.suspeita_fraude.devid[index];
+  const _devedor = dados.suspeita_fraude.devedor[index];
   const _nivel = dados.suspeita_fraude.nivel[index];
   const _telefone = dados.suspeita_fraude.telefone[index];
   const _titulo = dados.suspeita_fraude.titulo[index];
@@ -40,13 +42,13 @@ export default function () {
       <soapenv:Body>
         <sis:WSAssessoria.Execute>
           <sis:Token>${_auth}</sis:Token>
-          <sis:Carcod>${_carcod}</sis:Carcod>
+          <sis:Carcod>${_carteira}</sis:Carcod>
           <sis:Metodo>SUSPEITA_FRAUDE</sis:Metodo>
           <sis:Xmlin>
             &lt;suspeita_fraude&gt;
-              &lt;cod_assessora&gt;${_carcod}&lt;/cod_assessora&gt;
-              &lt;emp_cliente&gt;${_empcod}&lt;/emp_cliente&gt;
-              &lt;cod_cliente&gt;${_devid}&lt;/cod_cliente&gt;
+              &lt;cod_assessora&gt;${_carteira}&lt;/cod_assessora&gt;
+              &lt;emp_cliente&gt;${_empresa}&lt;/emp_cliente&gt;
+              &lt;cod_cliente&gt;${_devedor}&lt;/cod_cliente&gt;
               &lt;fraude_nivel_fraude&gt;${_nivel}&lt;/fraude_nivel_fraude&gt;
               &lt;fraude_telefone_contato&gt;${_telefone}&lt;/fraude_telefone_contato&gt;
               &lt;fraude_observacao&gt;Suspeita de fraude cadastrada via teste com K6&lt;/fraude_observacao&gt;
@@ -68,8 +70,10 @@ export default function () {
     "Content-Type": "application/xml",
   };
 
-  const res = http.post(`${_url}awsassessoria#suspeita_fraude`, payload, { headers });
-  
+  const res = http.post(`${_url}awsassessoria#suspeita_fraude`, payload, {
+    headers,
+  });
+
   check(res, {
     "Retorno positivo": (r) =>
       /<codigo>200<\/codigo>\s*<descricao>Sucesso<\/descricao>/i.test(r.body),

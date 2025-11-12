@@ -1,14 +1,16 @@
 import http from "k6/http";
 import { check } from "k6";
+import { baseScenario } from "./config/scenario.config.js";
+import { globalThresholds } from "./config/globalThresholds.js";
 
 // Carrega os dados JSON no init stage
-const dados = JSON.parse(open("../../data/values.json"));
+const dados = JSON.parse(open("../../database/values.json"));
 const _url = __ENV.URL;
 const _auth = dados.config.token;
 
 export const options = {
-  vus: 1,
-  iterations: 1,
+  ...baseScenario,
+  thresholds: globalThresholds,
 };
 
 export default function () {
@@ -18,25 +20,25 @@ export default function () {
     return;
   }      
 
-  const _user = dados.updateUser.usuario[index];
+  const _usuario = dados.updateUser.usuario[index];
   const _email = dados.updateUser.email[index];
-  const _name = dados.updateUser.nome[index];
+  const _nome = dados.updateUser.nome[index];
   const _cpf = dados.updateUser.cpf[index];
-  const _bday = dados.updateUser.bday[index];
-  const _phone = dados.updateUser.phone[index];
-  const _pgc = dados.updateUser.privilegio[index];
+  const _aniversario = dados.updateUser.aniversario[index];
+  const _telefone = dados.updateUser.telefone[index];
+  const _privilegio = dados.updateUser.privilegio[index];
   const headers = {
     "Authorization": _auth,
-    "UserCode": _user,
+    "UserCode": _usuario,
     "UserEmail": _email,
     "Content-Type": "application/json",
   };
   const payload = JSON.stringify({
-  userName: _name ,
-  userCPF: _cpf,
-  userBirthDate: _bday,
-  userCell: _phone,
-  userPrivilegeGroupCode: _pgc
+    userName: _nome,
+    userCPF: _cpf,
+    userBirthDate: _aniversario,
+    userCell: _telefone,
+    userPrivilegeGroupCode: _privilegio,
   });
 
   const res = http.post(`${_url}awsusuario/UpdateUser`, payload, {

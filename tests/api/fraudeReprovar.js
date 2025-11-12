@@ -1,9 +1,11 @@
 import http from "k6/http";
 import { check } from "k6";
-import encoding from "k6/encoding"; 
+import encoding from "k6/encoding";
+import { baseScenario } from "./config/scenario.config.js";
+import { globalThresholds } from "./config/globalThresholds.js";
 
 // Carrega os dados JSON no init stage
-const dados = JSON.parse(open("../../data/values.json"));
+const dados = JSON.parse(open("../../database/values.json"));
 const _url = __ENV.URL;
 const _auth = dados.config.token;
 
@@ -13,8 +15,8 @@ const arquivosBase64 = dados.fraudeReprovar.arquivo.map((path) => {
 });
 
 export const options = {
-  vus: 1, // número de usuários virtuais
-  iterations:1//duration: "5s", // duração total do teste
+  ...baseScenario,
+  thresholds: globalThresholds,
 };
 
 export default function () {
@@ -25,36 +27,37 @@ export default function () {
   }
 
   // Extrai dados para este VU
-  const _fracod = dados.fraudeReprovar.fraude[index];
-  const _user = dados.fraudeReprovar.usuario[index];
-  const _obs = dados.fraudeReprovar.observacao[index];
+  const _fraude = dados.fraudeReprovar.fraude[index];
+  const _usuario = dados.fraudeReprovar.usuario[index];
+  const _observacao = dados.fraudeReprovar.observacao[index];
   const _base64 = arquivosBase64[index];
   let payload;
-  
+
   if (arquivosBase64[index] != null) {
-      payload = {
-      idFraude: _fracod,
-      usuarioAcao: _user,
-      observacao: _obs,
-      anexo: _base64
-      };
-  } else { 
-      payload = {
-      idFraude: _fracod,
-      usuarioAcao: _user,
-      observacao: _obs
-      };
+    payload = {
+      idFraude: _fraude,
+      usuarioAcao: _usuario,
+      observacao: _observacao,
+      anexo: _base64,
+    };
+  } else {
+    payload = {
+      idFraude: _fraude,
+      usuarioAcao: _usuario,
+      observacao: _observacao,
+    };
   }
-  
+
   const headers = {
     "Content-Type": "application/json",
-    "Authorization": _auth,
+    Authorization: _auth,
   };
 
-  const res = http.post(`${_url}awsfraudeapi/fraudeReprovar`, payload, { headers });
-    
+  const res = http.post(`${_url}awsfraudeapi/fraudeReprovar`, payload, {
+    headers,
+  });
+
   check(res, {
-    "Status code 201": (r) =>
-     r.status === 201
+    "Status code 201": (r) => r.status === 201,
   });
 }

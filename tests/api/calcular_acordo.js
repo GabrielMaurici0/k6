@@ -1,43 +1,45 @@
 import http from "k6/http";
 import { check } from "k6";
+import { baseScenario } from "./config/scenario.config.js";
+import { globalThresholds } from "./config/globalThresholds.js";
 
-const dados = JSON.parse(open("../../data/values.json"));
+const dados = JSON.parse(open("../../database/values.json"));
 
-export let options = {
-  vus: 10, // usuários virtuais
-  duration: "30s", // duração do teste
+export const options = {
+  ...baseScenario,
+  thresholds: globalThresholds,
 };
 
 export default function () {
   const index = __VU - 1;
-  if (index >= dados.calcular_acordo.devid.length) {
+  if (index >= dados.calcular_acordo.devedor.length) {
     console.error(`Não há dados suficientes para o VU ${__VU}`);
     return;
   }
-  
+
   const _url = __ENV.URL;
-  const _auth = __ENV.AUTH;
-  const _carcod = __ENV.CARCOD;
-  const _empcod = __ENV.EMPCOD;
-  const _devid = dados.calcular_acordo.devid[index];
+  const _auth = dados.config.token;
+  const _carteira = dados.config.carteira;
+  const _empresa = dados.config.empresa;
+  const _devedor = dados.calcular_acordo.devedor[index];
   const _date = dados.calcular_acordo.data_calculo[index];
-  const _acordo = dados.calcular_acordo.acocod[index];
-  const _forpagcod = dados.calcular_acordo.forma_negociacao[index];
+  const _acordo = dados.calcular_acordo.acordo[index];
+  const _formaNegociacao = dados.calcular_acordo.forma_negociacao[index];
   const payload = `
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sis="siscobra">
       <soapenv:Body>
         <sis:WSAssessoria.Execute>
           <sis:Token>${_auth}</sis:Token>
-          <sis:Carcod>${_carcod}</sis:Carcod>
+          <sis:Carcod>${_carteira}</sis:Carcod>
           <sis:Metodo>CALCULAR_ACORDO</sis:Metodo>
           <sis:Xmlin>
             &lt;calcular_acordo&gt;
-              &lt;cod_assessoria&gt;${_carcod}&lt;/cod_assessoria&gt;
-              &lt;emp_cliente&gt;${_empcod}&lt;/emp_cliente&gt;
-              &lt;cod_cliente&gt;${_devid}&lt;/cod_cliente&gt;
+              &lt;cod_assessoria&gt;${_carteira}&lt;/cod_assessoria&gt;
+              &lt;emp_cliente&gt;${_empresa}&lt;/emp_cliente&gt;
+              &lt;cod_cliente&gt;${_devedor}&lt;/cod_cliente&gt;
               &lt;data_calculo&gt;${_date}&lt;/data_calculo&gt;
               &lt;codigo_acordo&gt;${_acordo}&lt;/codigo_acordo&gt;
-              &lt;forma_negociacao&gt;${_forpagcod}&lt;/forma_negociacao&gt;
+              &lt;forma_negociacao&gt;${_formaNegociacao}&lt;/forma_negociacao&gt;
             &lt;/calcular_acordo&gt;
           </sis:Xmlin>
         </sis:WSAssessoria.Execute>

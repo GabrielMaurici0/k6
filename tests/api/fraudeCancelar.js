@@ -1,14 +1,16 @@
 import http from "k6/http";
 import { check } from "k6";
+import { baseScenario } from "./config/scenario.config.js";
+import { globalThresholds } from "./config/globalThresholds.js";
 
 // Carrega os dados JSON no init stage
-const dados = JSON.parse(open("../../data/values.json"));
+const dados = JSON.parse(open("../../database/values.json"));
 const _url = __ENV.URL;
 const _auth = dados.config.token;
 
 export const options = {
-  vus: 1, // número de usuários virtuais
-  iterations: 1, //duration: "5s", // duração total do teste
+  ...baseScenario,
+  thresholds: globalThresholds,
 };
 
 export default function () {
@@ -20,13 +22,13 @@ export default function () {
   }
 
   // Extrai dados para este VU
-  const _fracod = dados.fraudeCancelar.fraude[index];
-  const _user = dados.fraudeCancelar.usuario[index];
-  const _obs = dados.fraudeCancelar.observacao[index];
+  const _fraude = dados.fraudeCancelar.fraude[index];
+  const _usuario = dados.fraudeCancelar.usuario[index];
+  const _observacao = dados.fraudeCancelar.observacao[index];
   const payload = {
-    idFraude: _fracod,
-    usuarioAcao: _user,
-    observacao: _obs,
+    idFraude: _fraude,
+    usuarioAcao: _usuario,
+    observacao: _observacao,
   };
   const headers = {
     "Content-Type": "application/json",

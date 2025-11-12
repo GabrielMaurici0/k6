@@ -1,20 +1,22 @@
 import http from "k6/http";
 import { check } from "k6";
+import { baseScenario } from "./config/scenario.config.js";
+import { globalThresholds } from "./config/globalThresholds.js";
 
 // Carrega os dados JSON no init stage
-const dados = JSON.parse(open("../../data/values.json"));
+const dados = JSON.parse(open("../../database/values.json"));
 const _url = __ENV.URL;
 const _auth = dados.config.token;
 
 export const options = {
-  vus: 2, // número de usuários virtuais
-  //duration: "1s", // duração total do teste
-  iterations: 2,
+  ...baseScenario,
+  thresholds: globalThresholds,
 };
+
 
 export default function () {
   const idx = __VU - 1
-  if (index >= dados.fraudeReprovar.fraude.length) {
+  if (index >= dados.listUser.status.length) {
     console.error(`Não há dados suficientes para o VU ${__VU}`);
     return;
   }  

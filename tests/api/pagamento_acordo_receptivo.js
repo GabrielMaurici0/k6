@@ -1,11 +1,13 @@
 import http from "k6/http";
 import { check } from "k6";
+import { baseScenario } from "./config/scenario.config.js";
+import { globalThresholds } from "./config/globalThresholds.js";
 
-const dados = JSON.parse(open("../../data/values.json"));
+const dados = JSON.parse(open("../../database/values.json"));
 
-export let options = {
-  vus: 2, // usuários virtuais
-  duration: "5s", // duração do teste
+export const options = {
+  ...baseScenario,
+  thresholds: globalThresholds,
 };
 
 export default function () {
@@ -13,28 +15,28 @@ export default function () {
   if (index >= dados.pagamento_acordo_receptivo.cpf.length) {
     console.error(`Não há dados suficientes para o VU ${__VU}`);
     return;
-  }      
-  
+  }
+
   const _url = __ENV.URL;
   const _auth = dados.config.token;
-  const _carcod = dados.config.carcod;
-  const _empcod = dados.config.empcod;
-  const _cpfValue = dados.pagamento_acordo_receptivo.cpf[index];
-  const _dddValue = dados.pagamento_acordo_receptivo.ddd[index];
-  const _telefoneValue = dados.pagamento_acordo_receptivo.telefone[index];
+  const _carteira = dados.config.carteira;
+  const _empresa = dados.config.empresa;
+  const _cpf = dados.pagamento_acordo_receptivo.cpf[index];
+  const _ddd = dados.pagamento_acordo_receptivo.ddd[index];
+  const _telefone = dados.pagamento_acordo_receptivo.telefone[index];
   const payload = `
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sis="siscobra">
       <soapenv:Body>
 		    <sis:WSAssessoria.Execute>
           <sis:Token>${_auth}</sis:Token>
-          <sis:Carcod>${_carcod}</sis:Carcod>
+          <sis:Carcod>${_carteira}</sis:Carcod>
           <sis:Metodo>PAGAMENTO_ACORDO_RECEPTIVO</sis:Metodo>
           <sis:Xmlin>
             &lt;pagamento_acordo_receptivo&gt;
-              &lt;emp_cliente&gt;${_empcod}&lt;/emp_cliente&gt;
-              &lt;cpf_cliente&gt;${_cpfValue}&lt;/cpf_cliente&gt;						
-              &lt;ddd_cliente&gt;${_dddValue}&lt;/ddd_cliente&gt;
-              &lt;fone_cliente&gt;${_telefoneValue}&lt;/fone_cliente&gt;																	
+              &lt;emp_cliente&gt;${_empresa}&lt;/emp_cliente&gt;
+              &lt;cpf_cliente&gt;${_cpf}&lt;/cpf_cliente&gt;						
+              &lt;ddd_cliente&gt;${_ddd}&lt;/ddd_cliente&gt;
+              &lt;fone_cliente&gt;${_telefone}&lt;/fone_cliente&gt;																	
             &lt;/pagamento_acordo_receptivo&gt;
           </sis:Xmlin>
         </sis:WSAssessoria.Execute>

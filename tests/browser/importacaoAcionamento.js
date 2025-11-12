@@ -1,42 +1,21 @@
 import path from "path";
 import { browser } from "k6/browser";
 import { Login } from "../../pages/loginPage.js";
+import { cenarios } from "./config/scenario.list.js";
+import { baseScenario } from "./config/scenario.config.js";
+import { globalThresholds } from "./config/globalThresholds.js";
 
-const dados = JSON.parse(open("../../data/values.json"));
+const dados = JSON.parse(open("../../database/values.json"));
 const _pathFile = "../../temp/";
 
-// Cada cenário abaixo executa uma função diferente
 export const options = {
-  scenarios: {
-    import_l1: {
-      executor: "shared-iterations",
-      exec: "importarL1", // função que será chamada
-      iterations: 1,
-      vus: 1,
-      options: { browser: { type: "chromium" } },
-    },
-    import_l2: {
-      executor: "shared-iterations",
-      exec: "importarL2",
-      iterations: 1,
-      vus: 1,
-      options: { browser: { type: "chromium" } },
-    },
-    import_l3: {
-      executor: "shared-iterations",
-      exec: "importarL3",
-      iterations: 1,
-      vus: 1,
-      options: { browser: { type: "chromium" } },
-    },
-  },
-  thresholds: {
-    checks: ["rate > 0.9"],
-  },
+  scenarios: Object.fromEntries(
+    cenarios.map((nome) => [nome, { ...baseScenario, exec: nome }])
+  ),
+  thresholds: globalThresholds,
 };
 
-// Função principal compartilhada por todos os cenários
-async function importarArquivo(nomeArquivo, _inconsistenciaValue) {
+async function importarArquivo(nomeArquivo, inconsistencia) {
   const idx = __VU - 1;
   let page;
   try {
@@ -66,49 +45,44 @@ async function importarArquivo(nomeArquivo, _inconsistenciaValue) {
     await page.waitForTimeout(1000);
     await expandir.click();
 
-    // Lê os dados correspondentes do JSON para este VU
-    const _assessoriaValue = dados.importacaoAcionamento.assessoria;
-    const _empresaValue = dados.importacaoAcionamento.empresa[idx];
-    const _layoutValue = dados.importacaoAcionamento.layout[idx];
+    // Dados do JSON
+    const { assessoria, empresa, layout } = dados.importacaoAcionamento;
+    const _empresaValue = empresa[idx];
+    const _layoutValue = layout[idx];
 
     console.log(`Importando arquivo: ${nomeArquivo}`);
 
-    // Preenche os campos
-    const assessoria = page.locator(
-      "#TABLE1 > tbody > tr:nth-child(1) > td:nth-child(2) > select"
-    );
-    await assessoria.selectOption(_assessoriaValue);
+    await page
+      .locator("#TABLE1 > tbody > tr:nth-child(1) > td:nth-child(2) > select")
+      .selectOption(assessoria);
 
-    const empresa = page.locator(
-      "#TABLE1 > tbody > tr:nth-child(2) > td:nth-child(2) > select"
-    );
-    await empresa.selectOption(_empresaValue);
+    await page
+      .locator("#TABLE1 > tbody > tr:nth-child(2) > td:nth-child(2) > select")
+      .selectOption(_empresaValue);
 
-    if (_inconsistenciaValue.toLowerCase() === "s") {
-      const inconsistencia = page.locator(
-        "#TABLE1 > tbody > tr:nth-child(3) > td:nth-child(2) > input[type=checkbox]"
-      );
-      await inconsistencia.click();
+    if (inconsistencia === "s") {
+      await page
+        .locator(
+          "#TABLE1 > tbody > tr:nth-child(3) > td:nth-child(2) > input[type=checkbox]"
+        )
+        .click();
     }
 
-    const layout = page.locator(
-      "#TABLE1 > tbody > tr:nth-child(4) > td:nth-child(2) > select"
-    );
-    await layout.selectOption(_layoutValue);
+    await page
+      .locator("#TABLE1 > tbody > tr:nth-child(4) > td:nth-child(2) > select")
+      .selectOption(_layoutValue);
 
     await page.waitForTimeout(1000);
 
-    // Upload do arquivo
+    // Upload
     const fileChooserPromise = page.waitForEvent("filechooser");
     await page.locator("#_FILE").click();
     const fileChooser = await fileChooserPromise;
     await fileChooser.setFiles(path.join(_pathFile, nomeArquivo));
 
-    // Clicar no botão de importação
+    // Importar
     const btnImportar = page.locator("#btnImportar");
-    if (await btnImportar.isEnabled()) {
-      await btnImportar.click();
-    }
+    if (await btnImportar.isEnabled()) await btnImportar.click();
 
     await page.waitForTimeout(3000);
     console.log(`Arquivo ${nomeArquivo} importado com sucesso`);
@@ -119,266 +93,13 @@ async function importarArquivo(nomeArquivo, _inconsistenciaValue) {
   }
 }
 
-// Cada função abaixo é um cenário independente
-export async function l1_ok() {
-  await importarArquivo("l1_ok.txt","n");
-}
-
-export async function l1_1inc() {
-  await importarArquivo("l1_1inc.txt", "n");
-}
-
-export async function l1_all_inc() {
-  await importarArquivo("l1_all_inc.txt", "n");
-}
-
-export async function l1_same_dev() {
-  await importarArquivo("l1_same_dev.txt", "n");
-}
-
-export async function l1_dist_dev() {
-  await importarArquivo("l1_dist_dev.txt", "n");
-}
-
-export async function l1_ok_fix() {
-  await importarArquivo("l1_ok_fix.txt","s");
-}
-
-export async function l1_1inc_fix() {
-  await importarArquivo("l1_1inc_fix.txt","s");
-}
-
-export async function l1_all_inc_fix() {
-  await importarArquivo("l1_all_inc_fix.txt","s");
-}
-
-export async function l1_same_dev_fix() {
-  await importarArquivo("l1_same_dev_fix.txt","s");
-}
-
-export async function l1_dist_dev_fix() {
-  await importarArquivo("l1_dist_dev_fix.txt","s");
-}
-
-export async function l2_ok() {
-  await importarArquivo("l2_ok.txt","n");
-}
-
-export async function l2_1inc() {
-  await importarArquivo("l2_1inc.txt","n");
-}
-
-export async function l2_all_inc() {
-  await importarArquivo("l2_all_inc.txt","n");
-}
-
-export async function l2_same_dev() {
-  await importarArquivo("l2_same_dev.txt","n");
-}
-
-export async function l2_same_tel_inv() {
-  await importarArquivo("l2_same_tel_inv.txt","n");
-}
-
-export async function l2_same_email_mix() {
-  await importarArquivo("l2_same_email_mix.txt","n");
-}
-
-export async function l2_dist_dev() {
-  await importarArquivo("l2_dist_dev.txt","n");
-}
-
-export async function l2_ok_fix() {
-  await importarArquivo("l2_ok_fix.txt","s");
-}
-
-export async function l2_1inc_fix() {
-  await importarArquivo("l2_1inc_fix.txt","s");
-}
-
-export async function l2_all_inc_fix() {
-  await importarArquivo("l2_all_inc_fix.txt","s");
-}
-
-export async function l2_same_dev_fix() {
-  await importarArquivo("l2_same_dev_fix.txt","s");
-}
-
-export async function l2_same_tel_inv_fix() {
-  await importarArquivo("l2_same_tel_inv_fix.txt","s");
-}
-
-export async function l2_same_email_mix_fix() {
-  await importarArquivo("l2_same_email_mix_fix.txt","s");
-}
-
-export async function l2_dist_dev_fix() {
-  await importarArquivo("l2_dist_dev_fix.txt","s");
-}
-
-export async function l3_ok() {
-  await importarArquivo("l3_ok.txt","n");
-}
-
-export async function l3_1inc() {
-  await importarArquivo("l3_1inc.txt","n");
-}
-
-export async function l3_all_inc() {
-  await importarArquivo("l3_all_inc.txt","n");
-}
-
-export async function l3_same_dev() {
-  await importarArquivo("l3_same_dev.txt","n");
-}
-
-export async function l3_same_tel_inv() {
-  await importarArquivo("l3_same_tel_inv.txt","n");
-}
-
-export async function l3_same_email_mix() {
-  await importarArquivo("l3_same_email_mix.txt","n");
-}
-
-export async function l3_dist_dev() {
-  await importarArquivo("l3_dist_dev.txt","n");
-}
-
-export async function l3_ok_fix() {
-  await importarArquivo("l3_ok_fix.txt","s");
-}
-
-export async function l3_1inc_fix() {
-  await importarArquivo("l3_1inc_fix.txt","s");
-}
-
-export async function l3_all_inc_fix() {
-  await importarArquivo("l3_all_inc_fix.txt","s");
-}
-
-export async function l3_same_dev_fix() {
-  await importarArquivo("l3_same_dev_fix.txt","s");
-}
-
-export async function l3_same_tel_inv_fix() {
-  await importarArquivo("l3_same_tel_inv_fix.txt","s");
-}
-export async function l3_same_email_mix_fix() {
-  await importarArquivo("l3_same_email_mix_fix.txt","s");
-}
-
-export async function l3_dist_dev_fix() {
-  await importarArquivo("l3_dist_dev_fix.txt","s");
-}
-
-export async function l4_ok() {
-  await importarArquivo("l4_ok.txt","n");
-}
-
-export async function l4_1inc() {
-  await importarArquivo("l4_1inc.txt","n");
-}
-
-export async function l4_all_inc() {
-  await importarArquivo("l4_all_inc.txt","n");
-}
-
-export async function l4_same_dev() {
-  await importarArquivo("l4_same_dev.txt","n");
-}
-
-export async function l4_same_tel_inv() {
-  await importarArquivo("l4_same_tel_inv.txt","n");
-}
-
-export async function l4_same_email_mix() {
-  await importarArquivo("l4_same_email_mix.txt","n");
-}
-
-export async function l4_dist_dev() {
-  await importarArquivo("l4_dist_dev.txt","n");
-}
-
-export async function l4_ok_fix() {
-  await importarArquivo("l4_ok_fix.txt","s");
-}
-
-export async function l4_1inc_fix() {
-  await importarArquivo("l4_1inc_fix.txt","s");
-}
-
-export async function l4_all_inc_fix() {
-  await importarArquivo("l4_all_inc_fix.txt","s");
-}
-
-export async function l4_same_dev_fix() {
-  await importarArquivo("l4_same_dev_fix.txt","s");
-}
-
-export async function l4_same_tel_inv_fix() {
-  await importarArquivo("l4_same_tel_inv_fix.txt","s");
-}
-
-export async function l4_same_email_mix_fix() {
-  await importarArquivo("l4_same_email_mix_fix.txt","s");
-}
-
-export async function l4_dist_dev_fix() {
-  await importarArquivo("l4_dist_dev_fix.txt","s");
-}
-
-export async function l5_ok() {
-  await importarArquivo("l5_ok.txt","n");
-}
-
-export async function l5_1inc() {
-  await importarArquivo("l5_1inc.txt","n");
-}
-
-export async function l5_all_inc() {
-  await importarArquivo("l5_all_inc.txt","n");
-}
-
-export async function l5_same_dev() {
-  await importarArquivo("l5_same_dev.txt","n");
-}
-
-export async function l5_same_tel_inv() {
-  await importarArquivo("l5_same_tel_inv.txt","n");
-}
-
-export async function l5_same_email_mix() {
-  await importarArquivo("l5_same_email_mix.txt","n");
-}
-
-export async function l5_dist_dev() {
-  await importarArquivo("l5_dist_dev.txt","n");
-}
-
-export async function l5_ok_fix() {
-  await importarArquivo("l5_ok_fix.txt","s");
-}
-
-export async function l5_1inc_fix() {
-  await importarArquivo("l5_1inc_fix.txt","s");
-}
-
-export async function l5_all_inc_fix() {
-  await importarArquivo("l5_all_inc_fix.txt","s");
-}
-
-export async function l5_same_dev_fix() {
-  await importarArquivo("l5_same_dev_fix.txt","s");
-}
-
-export async function l5_same_tel_inv_fix() {
-  await importarArquivo("l5_same_tel_inv_fix.txt","s");
-}
-
-export async function l5_same_email_mix_fix() {
-  await importarArquivo("l5_same_email_mix_fix.txt","s");
-}
-
-export async function l5_dist_dev_fix() {
-  await importarArquivo("l5_dist_dev_fix.txt","s");
+// Cria dinamicamente as funções de cenário com base no cenario.list.js
+for (const nome of cenarios) {
+  // Se o nome termina com "_fix", marca como inconsistente
+  const inconsistencia = nome.endsWith("_fix") ? "s" : "n";
+
+  // Cria dinamicamente a função e a exporta
+  exports[nome] = async function () {
+    await importarArquivo(`${nome}.txt`, inconsistencia);
+  };
 }

@@ -1,7 +1,7 @@
-const dados = JSON.parse(open("../../data/values.json"));
+const dados = JSON.parse(open("../../database/values.json"));
 
-let assessoria = dados.importacaoAcionamento.assessoria
-assessoria = Number(assessoria)
+let assessoria = dados.importacaoAcionamento.assessoria;
+assessoria = Number(assessoria);
 
 export const layouts = {
   //layout 1

@@ -1,41 +1,43 @@
 import http from "k6/http";
 import { check } from "k6";
+import { baseScenario } from "./config/scenario.config.js";
+import { globalThresholds } from "./config/globalThresholds.js";
 
-const dados = JSON.parse(open("../../data/values.json"));
+const dados = JSON.parse(open("../../database/values.json"));
 const _url = __ENV.URL;
 const _auth = dados.config.token;
-const _carcod = dados.config.carcod;
-const _empcod = dados.config.empcod;
+const _carteira = dados.config.carteira;
+const _empresa = dados.config.empresa;
 
-export let options = {
-  vus: 10, // usuários virtuais
-  duration: "30s", // duração do teste
+export const options = {
+  ...baseScenario,
+  thresholds: globalThresholds,
 };
 
 export default function () {
   const index = __VU - 1;
-  if (index >= dados.quebrar_acordo.devid.length) {
+  if (index >= dados.quebrar_acordo.devedor.length) {
     console.error(`Não há dados suficientes para o VU ${__VU}`);
     return;
-  }      
+  }
 
-  const _devid = dados.quebrar_acordo.devid[index];
-  const _acocod = dados.quebrar_acordo.acocod[index];
-  const _motivo = dados.quebrar_acordo.motivo[index];
+  const _devedor = dados.quebrar_acordo.devedor[index];
+  const _acordo = dados.quebrar_acordo.acordo[index];
+  const _motivoQuebra = dados.quebrar_acordo.motivo_quebra[index];
   const payload = `
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sis="siscobra">
       <soapenv:Body>
           <sis:WSAssessoria.Execute>
             <sis:Token>${_auth}</sis:Token>
-            <sis:Carcod>${_carcod}</sis:Carcod>
+            <sis:Carcod>${_carteira}</sis:Carcod>
             <sis:Metodo>QUEBRAR_ACORDO</sis:Metodo>
             <sis:Xmlin>
               &lt;quebrar_acordo&gt;
-                &lt;cod_assessoria&gt;${_carcod}&lt;/cod_assessoria&gt;
-                &lt;emp_cliente&gt;${_empcod}&lt;/emp_cliente&gt;
-                &lt;cod_cliente&gt;${_devid}&lt;/cod_cliente&gt;
-                &lt;codigo_acordo&gt;${_acocod}&lt;/codigo_acordo&gt;
-                &lt;motivo_quebra&gt;${_motivo}&lt;/motivo_quebra&gt;
+                &lt;cod_assessoria&gt;${_carteira}&lt;/cod_assessoria&gt;
+                &lt;emp_cliente&gt;${_empresa}&lt;/emp_cliente&gt;
+                &lt;cod_cliente&gt;${_devedor}&lt;/cod_cliente&gt;
+                &lt;codigo_acordo&gt;${_acordo}&lt;/codigo_acordo&gt;
+                &lt;motivo_quebra&gt;${_motivoQuebra}&lt;/motivo_quebra&gt;
               &lt;/quebrar_acordo&gt;
           </sis:Xmlin>
         </sis:WSAssessoria.Execute>
@@ -45,11 +47,9 @@ export default function () {
     "Content-Type": " application/xml",
   };
 
-  const res = http.post(
-    _url + "awsassessoria#quebrar_acordo",
-    payload,
-    { headers }
-  );
+  const res = http.post(_url + "awsassessoria#quebrar_acordo", payload, {
+    headers,
+  });
 
   check(res, {
     "Retorno positivo": (r) =>

@@ -1,25 +1,19 @@
 import { browser } from "k6/browser";
 import { check } from "https://jslib.k6.io/k6-utils/1.5.0/index.js";
-import { Login } from "../../pages/loginPage.js";
+import { Login } from "./pages/loginPage.js";
+import { baseScenario } from "./config/scenario.config.js";
+import { globalThresholds } from "./config/globalThresholds.js";
 
-const dados = JSON.parse(open("../../data/values.json"));
+const dados = JSON.parse(open("../../database/values.json"));
 
 export const options = {
   scenarios: {
-    ui: {
-      executor: "shared-iterations",
-      iterations: 1, //quantia de vezes que vai executar
-      vus: 1, //quantia de janelas que vão ser abertas simultaneamente
-      options: {
-        browser: {
-          type: "chromium",
-        },
-      },
+    gerarAcordo: {
+      ...baseScenario,
+      exec: "gerarAcordo",
     },
   },
-  thresholds: {
-    checks: ["rate > 0.9"],
-  },
+  thresholds: globalThresholds,
 };
 
 export default async function () {
