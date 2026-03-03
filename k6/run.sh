@@ -30,7 +30,7 @@ menu_with_arrows() {
         clear
         echo -e "${BLUE}${BOLD}╔${line}╗${NC}"
 
-        # título simples (sem emoji)
+        # título simples
         local title_len=${#title}
         local pad_left=$(( (width - title_len) / 2 ))
         local pad_right=$(( width - pad_left - title_len ))
@@ -69,7 +69,6 @@ menu_with_arrows() {
     done
 }
 
-
 finish_message() {
     local width=79
     local line
@@ -80,11 +79,9 @@ finish_message() {
     printf "${BLUE}${BOLD}║ %-79s ║${NC}\n" "🌐 Acesse http://localhost:3000 para visualizar as métricas"
     echo -e "${BLUE}${BOLD}╚${line}╝${NC}"
 
-
     echo -ne "${NC}Pressione Enter para continuar..."
     read -r
 }
-
 
 #  VERIFICAÇÃO DE SERVIÇOS DOCKER
 verify_docker() {
@@ -115,7 +112,6 @@ verify_docker() {
         fi
     done
 }
-
 
 #  EXECUÇÃO DOS TESTES
 run_test() {
@@ -184,7 +180,6 @@ declare -A test_map_api_wsusuario=(
     [9]="listGroup.js"
     [10]="listGroupUser.js"
 ) 
-
 
 #  LOOP PRINCIPAL
 while :; do

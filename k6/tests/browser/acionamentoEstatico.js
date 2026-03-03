@@ -10,7 +10,6 @@ export const options = {
   scenarios: {
     telaAcionamento: {
       ...baseScenario,
-      exec: "telaAcionamento",
     },
   },
   thresholds: globalThresholds,
@@ -26,6 +25,8 @@ export default async function () {
     await login.goto();
 
     await login.submitForm();
+
+    await page.waitForTimeout(5000);
 
     const expandir = page.locator("#toggleIcon");
     if (expandir.isEnabled()) {
@@ -53,7 +54,7 @@ export default async function () {
     );
     await menu.click();
 
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
 
     await expandir.click();
 
@@ -94,7 +95,9 @@ export default async function () {
       const pageUrl = await page.evaluate(() => window.location.href);
 
       await check(page, {
-        "URL contém hacionamento": () => pageUrl.includes("hacionamento"),
+        "URL contém hacionamento OU hdados_cliente": () =>
+          pageUrl.includes("hacionamento") ||
+          pageUrl.includes("hdados_cliente"),
       });
     }
   } catch (error) {

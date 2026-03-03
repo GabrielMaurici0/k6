@@ -1,3 +1,6 @@
+#terraform
+terraform/terraform.tfvars
+
 # k6 results
 *.json
 *.csv

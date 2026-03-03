@@ -1,0 +1,38 @@
+name: Performance Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  perf-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Start environment
+        run: docker compose -f docker-compose.test.yml up -d --build
+
+      - name: Wait for app
+        run: sleep 10
+
+      - name: Run migrations
+        run: docker compose exec app ./migrate.sh
+
+      - name: Run seed
+        run: docker compose exec app ./seed.sh
+
+      - name: Run k6
+        run: |
+          docker run --network host \
+          -v ${{ github.workspace }}/k6:/scripts \
+          grafana/k6 run \
+          -e BASE_URL=http://localhost:8080 \
+          /scripts/load-test.js
+
+      - name: Stop environment
+        if: always()
+        run: docker compose -f docker-compose.test.yml down -v

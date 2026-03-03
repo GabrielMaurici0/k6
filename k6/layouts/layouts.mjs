@@ -1,7 +1,9 @@
 const dados = JSON.parse(open("../../database/values.json"));
 
 let assessoria = dados.importacaoAcionamento.assessoria;
+assessoria = assessoria.trim()
 assessoria = Number(assessoria);
+
 
 export const layouts = {
   //layout 1
@@ -114,7 +116,7 @@ registros AS (
            data_vencimento || rpad(nome, 50, ' ') || status
     FROM base_devedor LIMIT 1)
     UNION ALL
-    SELECT '999000003000000000000000003000000000000000000000000000000'
+    SELECT '999000006000000000000000006000000000000000000000000000000'
 )
 SELECT * FROM registros) TO STDOUT;
   `,
@@ -186,7 +188,7 @@ UNION ALL
                 to_char(current_date + 3, 'YYYYMMDD') ||
                 rpad('Gabriel Mauricio', 50, ' ') || 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 58
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 1
         ) Union all 
         (
@@ -387,7 +389,7 @@ UNION ALL
                 to_char(current_date + 3, 'YYYYMMDD') ||
                 rpad('Gabriel Mauricio', 50, ' ') || 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 58
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 1
         ) Union all 
         (
@@ -603,51 +605,45 @@ UNION ALL
     ) TO STDOUT;
   `,
   l2_same_tel_inv: `
-    COPY (
-WITH primeiro AS (
-  SELECT devid, devempcod
-  FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
-  ORDER BY random()
-  LIMIT 1
-),
-restantes AS (
-  SELECT devid, devempcod
-  FROM devedor d
-  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
-  ORDER BY random()
-  LIMIT 2
-)
-SELECT
-  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}02' || '0000000001'
+    COPY (WITH primeiro AS
+          (
+         SELECT   devid,
+                  devempcod
+         FROM     devedor d
+         WHERE    devati = 0
+         AND      devsal > 50
+         AND      devempcod = 1
+         AND      carcod = 58
+         ORDER BY Random() limit 1 )
+SELECT '000'
+              || to_char(now(), 'DDMMYYYYHHMMSS')
+              || '005802'
+              || '0000000001'
 UNION ALL
-SELECT
-    '4001' ||
-  rpad(devid, 20, ' ') ||
-  rpad(devempcod::text, 20, ' ') ||
-  to_char(now(), 'YYYYMMDDHH24:MI:SS') ||
-  '012' ||
-  to_char(current_date + 3, 'YYYYMMDD') ||
-  rpad('GABRIEL MAURICIO', 50, ' ') ||
-  rpad('47992353808',85,' ')||
-  'acionado'
-FROM primeiro
+SELECT '4001'
+              || rpad(devid, 20, ' ')
+              || rpad(devempcod::text, 20, ' ')
+              || to_char(now(), 'YYYYMMDDHH24:MI:SS')
+              || '012'
+              || to_char(CURRENT_DATE + 3, 'YYYYMMDD')
+              || rpad('GABRIEL MAURICIO', 50, ' ')
+              || rpad('47992353808',85,' ')
+              || 'acionado'
+FROM   primeiro
 UNION ALL
-SELECT
-    '4001' ||
-  rpad(devid, 20, ' ') ||
-  rpad(devempcod::text, 20, ' ') ||
-  to_char(now(), 'YYYYMMDDHH24:MI:SS') ||
-  '012' ||
-  to_char(current_date + 3, 'YYYYMMDD') ||
-  rpad('GABRIEL MAURICIO', 50, ' ') ||
-  rpad('4792353808',85,' ')||
-  'acionado'
-FROM primeiro
+SELECT '4001'
+              || rpad(devid, 20, ' ')
+              || rpad(devempcod::text, 20, ' ')
+              || to_char(now(), 'YYYYMMDDHH24:MI:SS')
+              || '012'
+              || to_char(CURRENT_DATE + 3, 'YYYYMMDD')
+              || rpad('GABRIEL MAURICIO', 50, ' ')
+              || rpad('47923538',85,' ')
+              || 'acionado'
+FROM   primeiro
 UNION ALL
-        (
-            SELECT '999000003000000000000000003000000000000000000000000000000'
-        )
+          (
+                 SELECT '999000003000000000000000003000000000000000000000000000000' )
     ) TO STDOUT;
   `,
   l2_same_email_mix: `
@@ -714,7 +710,7 @@ COPY (
                 rpad('47992353808',85,' ')||
                 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 58
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 1
         ) Union all 
         (
@@ -981,7 +977,6 @@ UNION ALL
   `,
   l2_same_email_mix_fix: `
     COPY (
-
     WITH primeiro AS (
       SELECT devid, devempcod
       FROM devedor d
@@ -1043,7 +1038,7 @@ UNION ALL
                 rpad('47992353808',85,' ')||
                 'acionado'
             FROM devedor d
-            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = 58
+            WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
             ORDER BY random() LIMIT 1
         ) Union all 
         (
@@ -1353,8 +1348,9 @@ registros AS (
 )
 SELECT * FROM registros)TO STDOUT;
   `,
-  l3_same_dev: `
--- CREATE EXTENSION IF NOT EXISTS pgcrypto;
+  l3_same_dev:
+    // se precisar colocar no copy -- CREATE EXTENSION IF NOT EXISTS pgcrypto;
+    `
 copy(
 WITH primeiro AS (
   SELECT devid, devempcod
@@ -1434,11 +1430,92 @@ UNION ALL
 (
 SELECT '999000003000000000000000003000000000000000000000000000000'
 )
-)to STDOUT;
+)TO STDOUT;
 `,
-  l3_same_tel_inv: `  `,
-  l3_same_email_mix: `  `,
-  l3_dist_dev: `  `,
+  l3_same_tel_inv: `
+  COPY (
+  WITH primeiro AS (
+  SELECT devid, devempcod
+  FROM devedor d
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
+  ORDER BY random()
+  LIMIT 1
+),
+restantes AS (
+  SELECT devid, devempcod
+  FROM devedor d
+  WHERE devati = 0 AND devsal > 50 AND devempcod = 1 AND carcod = ${assessoria}
+  ORDER BY random()
+  LIMIT 2
+),
+linha_repetida_base AS (
+  SELECT 
+    devid,
+    devempcod,
+    to_char(now(), 'YYYYMMDDHH24:MI:SS') as datahora,
+    to_char(current_date + 3, 'YYYYMMDD') as data_futura,
+    'GABRIEL MAURICIO' as nome,
+    '47992353808' as telefone
+  FROM primeiro
+)
+SELECT
+  '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}03' || '0000000001'
+UNION ALL
+(
+SELECT
+  '4001' ||
+  RPAD(REPLACE(gen_random_uuid()::text, '-', ''), 40, ' ') ||
+  RPAD(devid, 20, ' ') ||
+  RPAD(devempcod::text, 20, ' ') ||
+  datahora ||
+  '012' ||
+  data_futura ||
+  RPAD(nome, 50, ' ') ||
+  RPAD(telefone, 15, ' ') ||
+  RPAD('', 70, ' ') ||
+  'acionado'
+FROM linha_repetida_base
+)
+UNION ALL
+(
+SELECT
+  '4001' ||
+  RPAD(REPLACE(gen_random_uuid()::text, '-', ''), 40, ' ') ||
+  RPAD(devid, 20, ' ') ||
+  RPAD(devempcod::text, 20, ' ') ||
+  datahora ||
+  '012' ||
+  data_futura ||
+  RPAD(nome, 50, ' ') ||
+  RPAD('4799235', 15, ' ') ||
+  RPAD('', 70, ' ') ||
+  'acionado'
+FROM linha_repetida_base
+)
+UNION ALL
+(
+SELECT
+  '4001' ||
+  RPAD(REPLACE(gen_random_uuid()::text, '-', ''), 40, ' ') ||
+  RPAD(devid, 20, ' ') || 
+  RPAD(devempcod::text, 20, ' ') ||
+  to_char(now(), 'YYYYMMDDHH24:MI:SS') ||
+  '012' ||
+  to_char(current_date + 3, 'YYYYMMDD') ||
+  RPAD('GABRIEL MAURICIO', 50, ' ') ||
+  RPAD('47992353808', 15, ' ') ||
+  RPAD('', 70, ' ') ||
+  'acionado'
+FROM restantes
+)
+UNION ALL
+(
+SELECT '999000004000000000000000004000000000000000000000000000000'
+)
+  ) TO STDOUT
+  `,
+  l3_same_email_mix: ` COPY () TO STDOUT `,
+  l3_dist_dev: ` COPY () TO STDOUT `,
 
   // Com inconsistências tratadas
   l3_ok_fix: `
@@ -1735,7 +1812,7 @@ SELECT * FROM registros)TO STDOUT;
   `,
   l3_same_dev_fix: `
 -- CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
+COPY (
 WITH primeiro AS (
   SELECT devid, devempcod
   FROM devedor d
@@ -1814,75 +1891,172 @@ UNION ALL
 (
 SELECT '999000003000000000000000003000000000000000000000000000000'
 )
+) TO STDOUT
 `,
   l3_same_tel_inv_fix: `
+  COPY () TO STDOUT
   `,
   l3_same_email_mix_fix: `
+  COPY () TO STDOUT
   `,
   l3_dist_dev_fix: `
+  COPY () TO STDOUT
   `,
   //layout 4
   //sem inc
   l4_ok: `
+  COPY (
+    SELECT 
+      '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}04' || '0000000001'
+      UNION ALL(
+        SELECT
+          '4001' ||
+          rpad((SELECT string_agg(
+                SUBSTRING('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+                FROM FLOOR(RANDOM() * 62 + 1)::int FOR 1),'') AS random_string
+              FROM generate_series(1, (FLOOR(RANDOM() * 40 + 1))::int)),40,' ') ||
+          rpad(devid, 20, ' ') ||
+          rpad(devempcod::text, 20, ' ') ||
+          to_char(now(), 'YYYYMMDDHH24:MI:SS') ||  
+          '012' ||
+          to_char(current_date + 3, 'YYYYMMDD') ||
+          rpad('Gabriel Mauricio', 50, ' ') ||
+          rpad('47992353808', 15, ' ') ||
+          rpad('teste@teste.com', 70 , ' ') ||
+          rpad('2', 10 , ' ') ||
+          rpad('acionado', 1024, ' ')       
+        FROM devedor d 
+        WHERE devati = 0 
+        AND devsal > 50 
+        AND devempcod = 1 
+        AND carcod = ${assessoria}
+        ORDER BY random() 
+        LIMIT 3)
+        UNION ALL(
+        SELECT '999000003000000000000000003000000000000000000000000000000')
+  ) TO STDOUT;
   `,
   l4_1inc: `
+  COPY () TO STDOUT
   `,
   l4_all_inc: `
+  COPY () TO STDOUT
   `,
   l4_same_dev: `
+  COPY () TO STDOUT
   `,
   l4_same_tel_inv: `
+  COPY () TO STDOUT
   `,
   l4_same_email_mix: `
+  COPY () TO STDOUT
   `,
   l4_dist_dev: `
+  COPY () TO STDOUT
   `,
 
   // Com inconsistências tratadas
   l4_ok_fix: `
+  COPY () TO STDOUT
   `,
   l4_1inc_fix: `
+  COPY () TO STDOUT
   `,
   l4_all_inc_fix: `
+  COPY () TO STDOUT
   `,
   l4_same_dev_fix: `
+  COPY () TO STDOUT
   `,
   l4_same_tel_inv_fix: `
+  COPY () TO STDOUT
   `,
   l4_same_email_mix_fix: `
+  COPY () TO STDOUT
   `,
   l4_dist_dev_fix: `
+  COPY () TO STDOUT
   `,
   //layout 5
   //sem inc
   l5_ok: `
+  COPY(  
+            SELECT 
+                '000' || to_char(now(), 'DDMMYYYYHHMMSS') || '00${assessoria}05' || '0000000001'
+            UNION ALL(
+            SELECT
+                '4001' ||
+                rpad(
+                (
+                    SELECT string_agg(
+                            SUBSTRING('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+                                        FROM FLOOR(RANDOM() * 62 + 1)::int FOR 1), 
+                            ''
+                        ) AS random_string
+                    FROM generate_series(1, (FLOOR(RANDOM() * 40 + 1))::int)
+                ),40,' ') ||
+                rpad(devid, 20, ' ') ||
+                rpad(devempcod::text, 20, ' ') ||
+                to_char(now(), 'YYYYMMDDHH24:MI:SS') ||  
+                '012' ||
+                to_char(current_date + 3, 'YYYYMMDD') ||
+                rpad('Gabriel Mauricio', 50, ' ') ||
+                rpad('47992353808', 15, ' ') ||
+                rpad('teste@teste.com', 70 , ' ') ||
+                rpad('2', 10 , ' ') ||
+                rpad('3', 4, ' ') ||
+                rpad('acionado', 1024, ' ') 
+            FROM devedor d 
+            WHERE devati = 0 
+            AND devsal > 50 
+            AND devempcod = 1 
+            AND carcod = ${assessoria}
+            ORDER BY random() 
+            LIMIT 3)
+            UNION ALL(
+            SELECT 
+                '999000003000000000000000003000000000000000000000000000000')
+      )TO STDOUT;
   `,
   l5_1inc: `
+  COPY () TO STDOUT
   `,
   l5_all_inc: `
+  COPY () TO STDOUT
   `,
   l5_same_dev: `
+  COPY () TO STDOUT
   `,
   l5_same_tel_inv: `
+  COPY () TO STDOUT
   `,
   l5_same_email_mix: `
+  COPY () TO STDOUT
   `,
   l5_dist_dev: `
+  COPY () TO STDOUT
   `,
 
   // Com inconsistências tratadas
   l5_ok_fix: `
+  COPY () TO STDOUT
   `,
   l5_1inc_fix: `
+  COPY () TO STDOUT
   `,
   l5_all_inc_fix: `
+  COPY () TO STDOUT
   `,
   l5_same_dev_fix: `
+  COPY () TO STDOUT
   `,
   l5_same_tel_inv_fix: `
+  COPY () TO STDOUT
   `,
   l5_same_email_mix_fix: `
+  COPY () TO STDOUT
   `,
   l5_dist_dev_fix: ` 
+  COPY () TO STDOUT
   `,
 };
