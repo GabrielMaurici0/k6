@@ -24,3 +24,47 @@ app:
     depends_on:
       db:
         condition: service_healthy
+
+influxdb:
+    image: influxdb:1.8
+    container_name: influxdb
+    ports: 
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
+    networks:
+      - K6TestManager
+
+grafana:
+  image: grafana/grafana:latest
+  container_name: grafana
+  ports:
+    - "3000:3000"
+  volumes:
+    - ../k6/Docker/grafana/:/etc/grafana/provisioning/
+    - ../k6/Docker/grafana/datasources/:/etc/grafana/provisioning/datasources
+    - ../k6/Docker/grafana/dashboards/:/etc/grafana/provisioning/dashboards
+    - ../k6/Docker/grafana/dashboards:/var/lib/grafana/dashboards
+    - ../k6/Docker/grafana/data/:/var/lib/grafana/
+  depends_on:
+    - influxdb
+  environment:
+    - GF_SECURITY_ADMIN_USER=admin
+    - GF_SECURITY_ADMIN_PASSWORD=admin
+  networks:
+    - K6TestManager
+
+K6TestManager:
+  image: k6testmanager:latest
+  container_name: k6testmanager
+  volumes:
+    - ../k6/temp/:/usr/src/k6-app/temp
+  env_file:
+    - ./.env
+  networks:
+    - K6TestManager
+
+
+networks:
+  K6TestManager: 
+    driver: bridge        

@@ -20,10 +20,10 @@ jobs:
         run: sleep 10
 
       - name: Run migrations
-        run: docker compose exec app ./migrate.sh
+        run: docker compose exec app /app/migrate.sh
 
       - name: Run seed
-        run: docker compose exec app ./seed.sh
+        run: docker compose exec app /app/seed.sh
 
       - name: Run k6
         run: |
@@ -31,7 +31,7 @@ jobs:
           -v ${{ github.workspace }}/k6:/scripts \
           grafana/k6 run \
           -e BASE_URL=http://localhost:8080 \
-          /scripts/load-test.js
+          /scripts/pipeline-run.sh
 
       - name: Stop environment
         if: always()
